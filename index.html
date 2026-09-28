@@ -4,114 +4,591 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>자산운영하기 온라인</title>
-<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0F0D0B;--panel:#1B1712;--panel2:#221D17;--border:#382E22;--gold:#D4A72C;--red:#E5484D;--blue:#5B8CFF;--text:#F5EFE6;--muted:#9C9284;--hd:'Do Hyeon',sans-serif;--bd:'IBM Plex Sans KR',sans-serif}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at top,#1a1510,#0F0D0B 55%);color:var(--text);font-family:var(--bd);min-height:100vh}
+:root{
+  --bg:#0F0D0B; --bg2:#151210;
+  --panel:#1B1712; --panel2:#221D17; --panel3:#2A2219;
+  --border:#382E22;
+  --gold:#D4A72C; --gold-soft:#8C7328;
+  --red:#E5484D; --green:#2FB380;
+  --text:#F5EFE6; --muted:#9C9284;
+  --font-head:'Do Hyeon', sans-serif;
+  --font-body:'IBM Plex Sans KR', sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0; background:radial-gradient(ellipse at top, #1a1510 0%, #0F0D0B 55%);
+  color:var(--text); font-family:var(--font-body); min-height:100%;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="light"]){ }
+}
+::-webkit-scrollbar{height:8px;width:8px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+.topbar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 16px; background:linear-gradient(180deg,#171310 0%, #14110D 100%);
+  border-bottom:1px solid var(--border);
+}
+.brand{font-family:var(--font-head); font-size:20px; letter-spacing:.5px; color:var(--gold); display:flex; align-items:center; gap:8px;}
+.brand small{font-family:var(--font-body); color:var(--muted); font-size:11px; display:block; margin-top:-2px;}
+.stats{display:flex; align-items:center; gap:10px;}
+.pill{
+  background:var(--panel2); border:1px solid var(--border); border-radius:999px;
+  padding:8px 14px; display:flex; flex-direction:column; align-items:flex-end; line-height:1.15;
+  min-width:104px;
+}
+.pill .lbl{font-size:10px; color:var(--muted);}
+.pill .val{font-family:var(--font-head); font-size:17px; color:var(--text);}
+.pill.money .val{color:var(--gold);}
+.pill.timer .val{color:var(--text);}
+.pill.timer.warn .val{color:var(--red); animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.restart-btn{
+  background:transparent; border:1px solid var(--border); color:var(--muted);
+  border-radius:8px; padding:8px 10px; font-family:var(--font-body); font-size:12px; cursor:pointer;
+}
+.restart-btn:hover{border-color:var(--gold); color:var(--gold);}
+
+.tabs{
+  display:flex; gap:6px; overflow-x:auto; padding:10px 12px; background:var(--bg2);
+  border-bottom:1px solid var(--border); position:sticky; top:calc(env(safe-area-inset-top,0px) + 62px); z-index:40;
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex:0 0 auto; background:var(--panel); border:1px solid var(--border); color:var(--muted);
+  font-family:var(--font-body); font-size:13px; font-weight:600; padding:9px 14px; border-radius:10px; cursor:pointer;
+  white-space:nowrap;
+}
+.tab-btn.active{ background:linear-gradient(180deg,#2C2115,#1E170F); color:var(--gold); border-color:var(--gold-soft); }
+
+.wrap{ max-width:900px; margin:0 auto; padding:18px 14px 60px; }
+.panel{ display:none; }
+.panel.active{ display:block; animation:fadein .25s ease; }
+@keyframes fadein{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:translateY(0)}}
+
+h2.gt{ font-family:var(--font-head); font-size:24px; color:var(--text); margin:0 0 4px; }
+p.gd{ color:var(--muted); font-size:13px; margin:0 0 16px; line-height:1.6; }
+.rule-box{
+  background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px 14px;
+  font-size:12.5px; color:var(--muted); margin-bottom:16px; line-height:1.7;
+}
+.rule-box b{color:var(--gold);}
+
+.card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:16px;}
+
+/* home */
+.home-hero{ text-align:center; padding:26px 10px 10px; }
+.home-hero .big{ font-family:var(--font-head); font-size:40px; color:var(--gold); }
+.home-hero p{ color:var(--muted); font-size:14px; }
+.game-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-top:20px;}
+.game-tile{
+  background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px 12px; text-align:center;
+  cursor:pointer;
+}
+.game-tile:hover{border-color:var(--gold-soft);}
+.game-tile .ic{font-size:26px; margin-bottom:6px;}
+.game-tile .nm{font-family:var(--font-head); font-size:15px; color:var(--text);}
+
+/* market tables */
+.market-table{ width:100%; border-collapse:collapse; font-size:12.5px;}
+.market-table th{ text-align:left; color:var(--muted); font-weight:600; padding:6px 6px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg2);}
+.market-table td{ padding:7px 6px; border-bottom:1px solid #241E17; vertical-align:middle;}
+.market-table tr.delisted td{ color:#5a5248; }
+.market-table .name{font-weight:600;}
+.market-table .price{font-variant-numeric:tabular-nums;}
+.up{color:var(--red); font-weight:600;}
+.down{color:#5B8CFF; font-weight:600;}
+.muted{color:var(--muted);}
+.qtyInput{ width:56px; background:var(--panel2); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:4px; font-size:12px;}
+.table-scroll{ max-height:520px; overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
+.portfolio-title{ font-family:var(--font-head); color:var(--gold); font-size:15px; margin-bottom:8px;}
+.portfolio-empty{ color:var(--muted); font-size:13px; text-align:center; padding:10px 0;}
+.pl-plus{color:var(--red); font-weight:600;}
+.pl-minus{color:#5B8CFF; font-weight:600;}
+button.mini{
+  background:var(--panel3); border:1px solid var(--border); color:var(--text); border-radius:6px;
+  padding:4px 7px; font-size:11px; cursor:pointer; margin-right:3px;
+}
+button.mini:hover{border-color:var(--gold-soft);}
+button.mini:disabled{opacity:.35; cursor:not-allowed;}
+button.mini.buy{color:var(--red);}
+button.mini.sell{color:#5B8CFF;}
+
+/* generic form */
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px;}
+input[type=number]{
+  background:var(--panel2); border:1px solid var(--border); color:var(--text); border-radius:8px;
+  padding:9px 10px; font-size:14px; width:130px; font-family:var(--font-body);
+}
+.btn{
+  background:linear-gradient(180deg,#E8BE47,#C79420); color:#221A08; border:none; border-radius:10px;
+  padding:11px 18px; font-family:var(--font-head); font-size:15px; cursor:pointer; letter-spacing:.3px;
+}
+.btn:hover{ filter:brightness(1.06); }
+.btn:disabled{ opacity:.4; cursor:not-allowed; filter:none;}
+.btn.ghost{ background:transparent; border:1px solid var(--border); color:var(--text); }
+.btn.small{ padding:8px 12px; font-size:13px; }
+.msg{ font-size:14px; min-height:20px; margin:10px 0; color:var(--text); font-weight:600;}
+.msg.win{color:var(--red);}
+.msg.lose{color:#5B8CFF;}
+
+/* RPS */
+.rps-countdown{ text-align:center; font-family:var(--font-head); font-size:32px; color:var(--gold); min-height:42px; letter-spacing:1px;}
+.hand-row{ display:flex; gap:10px; margin:14px 0;}
+.hand-btn{
+  flex:1; background:var(--panel2); border:1px solid var(--border); border-radius:14px; padding:18px 6px;
+  font-size:34px; text-align:center; cursor:pointer;
+}
+.hand-btn:hover{border-color:var(--gold-soft);}
+.hand-btn:disabled{opacity:.3; cursor:not-allowed;}
+.streak-box{ background:var(--panel2); border:1px dashed var(--gold-soft); border-radius:12px; padding:14px; margin-top:10px; display:none;}
+.streak-box.show{display:block;}
+.streak-meter{display:flex; gap:4px; margin:8px 0;}
+.streak-dot{width:16px; height:8px; border-radius:3px; background:var(--border);}
+.streak-dot.on{background:var(--gold);}
+
+/* shell game */
+.shell-track{ position:relative; height:130px; margin:24px 0 10px; }
+.ball{
+  position:absolute; bottom:6px; left:47px; width:20px; height:20px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff5cf, var(--gold) 60%, #8a6a10);
+  opacity:0; transition:transform .12s linear; z-index:1;
+}
+.cup{
+  position:absolute; bottom:0; left:20px; width:90px; height:90px; z-index:2;
+  transition:transform .12s linear; display:flex; align-items:center; justify-content:center; font-size:52px;
+  filter:drop-shadow(0 6px 6px rgba(0,0,0,.5));
+}
+.shell-choices{ display:flex; gap:10px; margin-top:14px;}
+.shell-choices button{flex:1;}
+
+/* chinchiro */
+.dice-row{ display:flex; gap:8px; justify-content:center; margin:10px 0;}
+.die{ width:44px; height:44px; background:var(--panel2); border:1px solid var(--border); border-radius:8px;
+  display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:700; color:var(--gold);}
+.chin-side{ text-align:center; padding:10px; }
+.chin-side h4{ margin:2px 0 6px; color:var(--muted); font-size:12px; font-weight:600;}
+.chin-vs{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;}
+.chin-vs .vslabel{ font-family:var(--font-head); color:var(--gold-soft); font-size:15px;}
+.chin-tag{ font-family:var(--font-head); color:var(--gold); font-size:14px; margin-top:4px;}
+
+/* horse race */
+.track{ position:relative; background:linear-gradient(180deg,#20301f,#182518); border-radius:10px; padding:10px 0; margin-bottom:14px; overflow:hidden;}
+.lane{ position:relative; height:38px; border-bottom:1px dashed rgba(255,255,255,.08);}
+.lane:last-child{border-bottom:none;}
+.horse{ position:absolute; left:4px; top:4px; font-size:22px; transition:transform linear; will-change:transform; transform:scaleX(-1);}
+.finish-line{ position:absolute; right:8px; top:0; bottom:0; width:3px; background:repeating-linear-gradient(180deg,#fff 0 6px,#000 6px 12px); opacity:.5;}
+.horse-pick{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-bottom:14px;}
+.horse-opt{ background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:10px; cursor:pointer; font-size:12.5px;}
+.horse-opt.sel{ border-color:var(--gold); background:#2A2115; }
+.horse-opt b{ display:block; font-family:var(--font-head); color:var(--text); font-size:14px; margin-bottom:2px;}
+
+/* slot */
+.slot-machine{ display:flex; justify-content:center; gap:8px; background:var(--panel2); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:14px;}
+.reel{ width:76px; height:76px; background:#0F0D0B; border:2px solid var(--gold-soft); border-radius:10px;
+  display:flex; align-items:center; justify-content:center; font-size:40px; overflow:hidden;}
+.paytable{ font-size:12px; color:var(--muted); }
+.paytable div{ display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid #241E17;}
+
+/* lottery */
+.ticket-wrap{ display:flex; justify-content:center; margin:10px 0 16px;}
+.ticket{ position:relative; width:260px; height:140px; border-radius:14px; overflow:hidden; border:1px solid var(--border);
+  background:linear-gradient(135deg,#241d13,#171209);}
+.ticket-result{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;}
+.ticket-result .t1{ font-family:var(--font-head); font-size:22px; color:var(--gold);}
+.ticket-result .t2{ font-size:12px; color:var(--muted); margin-top:4px;}
+.scratch-canvas{ position:absolute; inset:0; cursor:grab; touch-action:none;}
+
+/* roulette */
+.roulette-wrap{ display:flex; justify-content:center; margin-bottom:16px; position:relative;}
+.wheel{ width:220px; height:220px; border-radius:50%; border:6px solid #171209; position:relative;
+  transition:transform 3s cubic-bezier(.17,.67,.16,1);
+  background:conic-gradient(
+    #b02226 0deg 36deg, #1b1b1b 36deg 72deg, #b02226 72deg 108deg, #1b1b1b 108deg 144deg,
+    #b02226 144deg 180deg, #1b1b1b 180deg 216deg, #b02226 216deg 252deg, #1b1b1b 252deg 288deg,
+    #b02226 288deg 324deg, #2FB380 324deg 360deg);
+}
+.wheel-num{ position:absolute; left:50%; top:8px; width:24px; margin-left:-12px; text-align:center; transform-origin:12px 96px; font-size:13px; font-weight:700; color:#fff;}
+.wheel-pointer{ position:absolute; top:-4px; left:50%; transform:translateX(-50%); font-size:20px; z-index:5;}
+.bet-type-row{ display:flex; gap:8px; margin-bottom:10px;}
+.bet-type-row button{flex:1;}
+.num-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:12px;}
+.num-btn{ background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 0; text-align:center; cursor:pointer; font-family:var(--font-head); color:var(--text);}
+.num-btn.red{color:#ff8a8a;}
+.num-btn.black{color:#c9c9c9;}
+.num-btn.green{color:#6be3a8;}
+.num-btn.sel{ border-color:var(--gold); }
+.color-grid,.oe-grid{ display:flex; gap:8px; margin-bottom:12px;}
+.color-grid button,.oe-grid button{ flex:1; }
+
+/* game over overlay */
+.overlay{ position:fixed; inset:0; background:rgba(6,5,4,.88); z-index:100; display:none; align-items:center; justify-content:center; padding:20px;}
+.overlay.show{display:flex;}
+.over-card{ background:var(--panel); border:1px solid var(--gold-soft); border-radius:18px; padding:34px 28px; max-width:380px; text-align:center;}
+.over-card .grade{ font-family:var(--font-head); font-size:32px; color:var(--gold); margin-bottom:6px;}
+#aojiPick{ transition:transform .12s ease; display:inline-block; }
+.over-card .fin{ font-size:15px; color:var(--muted); margin-bottom:2px;}
+.over-card .finmoney{ font-family:var(--font-head); font-size:28px; color:var(--text); margin:8px 0 18px;}
+
+@media(max-width:480px){
+  .brand span.tx{display:none;}
+  .pill{min-width:88px; padding:7px 10px;}
+}
 .hidden{display:none!important}
-.wrap{max-width:820px;margin:0 auto;padding:16px 14px 50px}
-h1{font-family:var(--hd);color:var(--gold);font-size:34px;text-align:center;margin:30px 0 4px}
+.big-title{font-family:var(--font-head);color:var(--gold);font-size:34px;text-align:center;margin:30px 0 4px}
 .sub{color:var(--muted);text-align:center;font-size:13px;margin-bottom:22px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
-input{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:11px;font-size:15px;width:100%;font-family:var(--bd)}
-.row{display:flex;gap:8px;margin-top:10px}
-.btn{background:linear-gradient(180deg,#E8BE47,#C79420);color:#221A08;border:0;border-radius:10px;padding:12px 18px;font-family:var(--hd);font-size:16px;cursor:pointer;width:100%}
-.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.lbl{font-size:12px;color:var(--muted);margin-bottom:6px}
-.code{font-family:var(--hd);font-size:46px;color:var(--gold);text-align:center;letter-spacing:6px}
+.lbl2{font-size:12px;color:var(--muted);margin-bottom:6px}
+input[type=text]{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:11px;font-size:15px;width:100%;font-family:var(--font-body)}
+.btn.block{width:100%;margin-top:10px}
+.code{font-family:var(--font-head);font-size:46px;color:var(--gold);text-align:center;letter-spacing:6px}
 .pl{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid #241E17;font-size:14px}
 .me{color:var(--gold);font-weight:600}
-.top{position:sticky;top:0;z-index:9;background:#14110D;border-bottom:1px solid var(--border);padding:10px 14px;display:flex;gap:8px;justify-content:space-between;align-items:center}
-.pill{background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:6px 12px;text-align:right;line-height:1.15}
-.pill small{display:block;font-size:10px;color:var(--muted)}
-.pill b{font-family:var(--hd);font-size:16px}
-.tabs{display:flex;gap:6px;margin:12px 0}
-.tab{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:10px;cursor:pointer;font-family:var(--bd);font-weight:600}
-.tab.on{color:var(--gold);border-color:#8C7328}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{text-align:left;color:var(--muted);padding:6px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#151210}
-td{padding:6px;border-bottom:1px solid #241E17}
-.scroll{max-height:520px;overflow:auto;border:1px solid var(--border);border-radius:10px}
-.q{width:58px;padding:4px;font-size:12px}
-.mini{background:#2A2219;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 7px;font-size:11px;cursor:pointer;margin-right:2px}
-.mini:disabled{opacity:.3}
-.up{color:var(--red)}.dn{color:var(--blue)}.mut{color:var(--muted)}
-tr.dead td{color:#5a5248}
+.rank{font-family:var(--font-head);width:34px;display:inline-block}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2A2219;border:1px solid var(--gold);padding:10px 16px;border-radius:10px;font-size:14px;z-index:99}
-.rank{font-family:var(--hd);width:34px;display:inline-block}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-<div id="entry">
-  <h1>💰 자산운영하기</h1>
+<div id="entry" class="wrap">
+  <div class="big-title">💰 자산운영하기</div>
   <div class="sub">10분 안에 자산을 불려라 · 최대 10명 온라인 대결</div>
   <div class="card">
-    <div class="lbl">닉네임 (최대 10자)</div>
-    <input id="nm" maxlength="10" placeholder="닉네임 입력">
-    <div class="row"><button class="btn" onclick="createRoom()">방 만들기</button></div>
+    <div class="lbl2">닉네임 (최대 10자)</div>
+    <input type="text" id="nm" maxlength="10" placeholder="닉네임 입력">
+    <button class="btn block" onclick="createRoom()">방 만들기</button>
   </div>
   <div class="card">
-    <div class="lbl">친구가 알려준 방 코드</div>
-    <input id="cd" maxlength="6" placeholder="예: K7M2QX" style="text-transform:uppercase">
-    <div class="row"><button class="btn ghost" onclick="joinRoom()">방 입장</button></div>
+    <div class="lbl2">친구가 알려준 방 코드</div>
+    <input type="text" id="cd" maxlength="6" placeholder="예: K7M2QX" style="text-transform:uppercase">
+    <button class="btn ghost block" onclick="joinRoom()">방 입장</button>
   </div>
 </div>
-
-<div id="lobby" class="hidden">
-  <h1>대기실</h1>
+<div id="lobby" class="wrap hidden">
+  <div class="big-title">대기실</div>
   <div class="card">
-    <div class="lbl" style="text-align:center">방 코드</div>
+    <div class="lbl2" style="text-align:center">방 코드</div>
     <div class="code" id="roomCode"></div>
-    <div class="row"><button class="btn ghost" onclick="copyLink()">초대 링크 복사</button></div>
+    <button class="btn ghost block" onclick="copyLink()">초대 링크 복사</button>
   </div>
-  <div class="card">
-    <div class="lbl" id="plCount"></div>
-    <div id="plList"></div>
-  </div>
-  <button class="btn" id="startBtn" onclick="act({type:'start'})">게임 시작</button>
+  <div class="card"><div class="lbl2" id="plCount"></div><div id="plList"></div></div>
+  <button class="btn block" id="startBtn" onclick="act({type:'start'}).catch(e=>toast(e.message))">게임 시작</button>
   <div class="sub" id="waitMsg" style="margin-top:10px"></div>
 </div>
-
-<div id="game" class="hidden">
-  <div class="top" style="margin:0 -14px">
-    <div class="pill"><small>보유 현금</small><b id="gMoney"></b></div>
-    <div class="pill"><small>총 자산</small><b id="gTotal"></b></div>
-    <div class="pill"><small>남은 시간</small><b id="gTime"></b></div>
-  </div>
-  <div class="tabs">
-    <button class="tab on" data-t="stock">📈 주식</button>
-    <button class="tab" data-t="coin">🪙 코인</button>
-    <button class="tab" data-t="rank">🏆 순위</button>
-  </div>
-  <div id="p-stock"><div class="scroll"><table><thead><tr><th>종목</th><th>현재가</th><th>등락</th><th>보유</th><th>수량</th><th>거래</th></tr></thead><tbody id="stockBody"></tbody></table></div></div>
-  <div id="p-coin" class="hidden"><div class="scroll"><table><thead><tr><th>코인</th><th>현재가</th><th>등락</th><th>보유</th><th>수량</th><th>거래</th></tr></thead><tbody id="coinBody"></tbody></table></div></div>
-  <div id="p-rank" class="hidden">
-    <div class="card"><div class="lbl">🏆 실시간 순위 (현금 + 보유 평가액)</div><div id="board"></div></div>
-    <div class="card"><div class="lbl">💼 내 보유 종목</div><div id="mine"></div></div>
+<div id="app" class="hidden">
+<div class="topbar">
+  <div class="brand">💰 <span class="tx">자산운영하기</span><small>10분 안에 자산을 불려라</small></div>
+  <div class="stats">
+    <div class="pill money"><span class="lbl">보유 자산</span><span class="val" id="moneyDisplay">100,000원</span></div>
+    <div class="pill"><span class="lbl">총 자산</span><span class="val" id="totalDisplay">100,000원</span></div>
+    <div class="pill timer" id="timerPill"><span class="lbl">남은 시간</span><span class="val" id="timerDisplay">10:00</span></div>
+    
   </div>
 </div>
 
-<div id="end" class="hidden">
-  <h1>🏁 게임 종료</h1>
-  <div class="card"><div class="lbl">최종 순위</div><div id="final"></div></div>
-  <button class="btn" onclick="newGame()">새 게임</button>
+<div class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="home">홈</button>
+  <button class="tab-btn" data-tab="stock">📈 주식</button>
+  <button class="tab-btn" data-tab="coin">💰 코인</button>
+  <button class="tab-btn" data-tab="rps">✌️ 가위바위보</button>
+  <button class="tab-btn" data-tab="shell">🥤 야바위</button>
+  <button class="tab-btn" data-tab="chin">🎲 친치로</button>
+  <button class="tab-btn" data-tab="horse">🐎 경마</button>
+  <button class="tab-btn" data-tab="slot">🎰 슬롯머신</button>
+  <button class="tab-btn" data-tab="lotto">🎫 복권</button>
+  <button class="tab-btn" data-tab="roulette">🎡 룰렛</button>
+  <button class="tab-btn" data-tab="aoji">⛏️ 아오지 탄광</button>
+  <button class="tab-btn" data-tab="rank">🏆 순위</button>
 </div>
 
+<div class="wrap">
+
+  <!-- HOME -->
+  <div class="panel active" id="tab-home">
+    <div class="home-hero">
+      <div class="big">자산운영하기</div>
+      <p>주식·코인 투자부터 가위바위보, 야바위, 친치로, 경마, 슬롯머신, 복권, 룰렛까지 — 제한시간 10분, 최대 10명이 같은 시세를 보며 겨루는 온라인 대결입니다.</p>
+    </div>
+    <div class="game-grid">
+      <div class="game-tile" data-goto="stock"><div class="ic">📈</div><div class="nm">주식</div></div>
+      <div class="game-tile" data-goto="coin"><div class="ic"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#D4A72C" stroke="#8C7328" stroke-width="1.5"/><circle cx="12" cy="12" r="7.2" fill="none" stroke="#8C7328" stroke-width="1"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="#221A08" font-family="sans-serif">C</text></svg></div><div class="nm">코인</div></div>
+      <div class="game-tile" data-goto="rps"><div class="ic">✌️</div><div class="nm">가위바위보</div></div>
+      <div class="game-tile" data-goto="shell"><div class="ic">🥤</div><div class="nm">야바위</div></div>
+      <div class="game-tile" data-goto="chin"><div class="ic">🎲</div><div class="nm">친치로</div></div>
+      <div class="game-tile" data-goto="horse"><div class="ic">🐎</div><div class="nm">경마</div></div>
+      <div class="game-tile" data-goto="slot"><div class="ic">🎰</div><div class="nm">슬롯머신</div></div>
+      <div class="game-tile" data-goto="lotto"><div class="ic">🎫</div><div class="nm">복권</div></div>
+      <div class="game-tile" data-goto="roulette"><div class="ic">🎡</div><div class="nm">룰렛</div></div>
+      <div class="game-tile" data-goto="aoji"><div class="ic">⛏️</div><div class="nm">아오지 탄광</div></div>
+    </div>
+    <div class="card" id="gameStatsBox" style="margin-top:20px;"></div>
+    <div class="card">
+      <div class="portfolio-title">⚖️ 게임 밸런스 (기대 환수율)</div>
+      <div class="paytable">
+        <div><span>📈 주식 / 💰 코인 (10분 보유 시)</span><span>≈ 97.5%</span></div>
+        <div><span>✌️ 가위바위보 (승 1.95배, 비기면 재대결)</span><span>97.5%</span></div>
+        <div><span>🥤 야바위 (2.2배, 실력 게임)</span><span>정확도 44% 시 97%</span></div>
+        <div><span>🎲 친치로 (전통 족보, 오야 선공)</span><span>≈ 97.6%</span></div>
+        <div><span>🐎 경마 (말별 배당)</span><span>≈ 97%</span></div>
+        <div><span>🎰 슬롯머신</span><span>97.5%</span></div>
+        <div><span>🎫 복권</span><span>97.5%</span></div>
+        <div><span>🎡 룰렛 (숫자/색상/홀짝 모두)</span><span>97.5%</span></div>
+        <div><span>⛏️ 아오지 탄광 (현금 5,000원 미만 한정)</span><span>구제용</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK -->
+  <div class="panel" id="tab-stock">
+    <h2 class="gt">📈 주식 시장</h2>
+    <p class="gd">30개 종목, 10초마다 가격이 변동합니다.</p>
+    <div class="rule-box">
+      가격 변동폭은 <b>±1% / ±5% / ±10% / ±50% / 상장폐지</b> 중 하나가 <b>가중치 70 : 20 : 50 : 3 : 1</b> 비율로 뽑힙니다 (합이 100%를 넘어 상대 가중치로 정규화). 상장폐지되면 보유 주식은 전량 소각됩니다. 상장폐지 위험을 보정해 상승 확률이 약 56%로 설정되어 있어, 10분 내내 보유했을 때 기대값은 약 97.5%입니다.
+    </div>
+    <div class="card" id="stockPortfolio"></div>
+    <div class="table-scroll">
+      <table class="market-table">
+        <thead><tr><th>종목</th><th>현재가</th><th>등락</th><th>보유</th><th>수량</th><th>거래</th></tr></thead>
+        <tbody id="stockBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COIN -->
+  <div class="panel" id="tab-coin">
+    <h2 class="gt">🪙 코인 거래소</h2>
+    <p class="gd">30개 코인, 5초마다 가격이 변동합니다. 주식보다 훨씬 변동성이 큽니다.</p>
+    <div class="rule-box">
+      가격 변동폭은 <b>±5% / ±10% / ±50% / 상장폐지</b> 중 하나가 <b>가중치 20 : 50 : 5 : 1</b> 비율로 뽑힙니다. 상장폐지 위험을 보정해 상승 확률이 약 56%로 설정되어 있어, 10분 내내 보유했을 때 기대값은 약 97.5%입니다.
+    </div>
+    <div class="card" id="coinPortfolio"></div>
+    <div class="table-scroll">
+      <table class="market-table">
+        <thead><tr><th>코인</th><th>현재가</th><th>등락</th><th>보유</th><th>수량</th><th>거래</th></tr></thead>
+        <tbody id="coinBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RPS -->
+  <div class="panel" id="tab-rps">
+    <h2 class="gt">✌️ 가위바위보</h2>
+    <p class="gd">이기면 배팅금의 1.95배, 비기면 배팅금 반환 후 재시도, 지면 전액 소멸. 승리 후 <b>연승 도전</b>을 누르면 받은 금액 전체를 다시 걸고 한 판 더 — 최대 10연승까지 갈 수 있습니다.</p>
+    <div class="card">
+      <div class="row">
+        <label>배팅 금액</label>
+        <input type="number" id="rpsBet" min="1000" step="1000" value="1000">
+        <span class="muted" style="font-size:12px;">최소 1,000원</span>
+      </div>
+      <div class="rps-countdown" id="rpsCountdown"></div>
+      <div class="hand-row">
+        <button class="hand-btn" id="rpsHandRock" onclick="chooseHand('rock')">✊<br><span style="font-size:12px;">바위</span></button>
+        <button class="hand-btn" id="rpsHandPaper" onclick="chooseHand('paper')">✋<br><span style="font-size:12px;">보</span></button>
+        <button class="hand-btn" id="rpsHandScissors" onclick="chooseHand('scissors')">✌️<br><span style="font-size:12px;">가위</span></button>
+      </div>
+      <div class="msg" id="rpsMsg"></div>
+      <div class="streak-box" id="rpsStreakBox">
+        <div>현재 연승: <b id="rpsStreakNum">0</b> / 10 · 판돈 <b id="rpsPotDisplay">0원</b></div>
+        <div class="streak-meter" id="rpsStreakMeter"></div>
+        <button class="btn small" onclick="collectRPS()">💰 지금 수령하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHELL -->
+  <div class="panel" id="tab-shell">
+    <h2 class="gt">🥤 야바위</h2>
+    <p class="gd">공이 든 컵을 맞추면 배팅금의 2.2배! (찍기만 하면 불리하고, 눈으로 따라가면 유리한 실력 게임) 컵이 아주 빠르게 뒤섞이니 눈을 부릅뜨세요.</p>
+    <div class="card">
+      <div class="row">
+        <label>배팅 금액</label>
+        <input type="number" id="shellBet" min="1000" step="1000" value="1000">
+        <button class="btn" onclick="startShell()">셔플 시작</button>
+      </div>
+      <div class="msg" id="shellMsg">배팅 후 셔플을 시작하세요.</div>
+      <div class="shell-track">
+        <div class="ball" id="ballMarker">⚪</div>
+        <div class="cup" id="cup0">🥤</div>
+        <div class="cup" id="cup1">🥤</div>
+        <div class="cup" id="cup2">🥤</div>
+      </div>
+      <div class="shell-choices">
+        <button class="btn ghost" id="shellChoice0" onclick="chooseShell(0)" disabled>1번</button>
+        <button class="btn ghost" id="shellChoice1" onclick="chooseShell(1)" disabled>2번</button>
+        <button class="btn ghost" id="shellChoice2" onclick="chooseShell(2)" disabled>3번</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHINCHIRO -->
+  <div class="panel" id="tab-chin">
+    <h2 class="gt">🎲 친치로</h2>
+    <p class="gd">오야(컴퓨터)가 먼저 굴립니다. 오야가 특수패를 내면 바로 판정, 아니면 내가 굴려 눈을 비교해요. 특수패 손실 대비를 위해 보유금의 1/5까지만 배팅할 수 있습니다.</p>
+    <div class="card">
+      <div class="row">
+        <label>배팅 금액</label>
+        <input type="number" id="chinBet" min="1000" step="1000" value="1000">
+        <button class="btn" onclick="playChinchiro()">주사위 던지기</button>
+      </div>
+      <div class="chin-vs">
+        <div class="chin-side"><h4>플레이어</h4>
+          <div class="dice-row" id="chinPlayerDice"><div class="die">-</div><div class="die">-</div><div class="die">-</div></div>
+          <div class="chin-tag" id="chinPlayerTag">-</div></div>
+        <div class="vslabel">VS</div>
+        <div class="chin-side"><h4>오야(컴퓨터)</h4>
+          <div class="dice-row" id="chinBankerDice"><div class="die">-</div><div class="die">-</div><div class="die">-</div></div>
+          <div class="chin-tag" id="chinBankerTag">-</div></div>
+      </div>
+      <div class="msg" id="chinMsg" style="text-align:center; margin-top:14px;"></div>
+    </div>
+    <div class="card">
+      <div style="font-family:var(--font-head); color:var(--gold); font-size:15px; margin-bottom:8px;">족보표 (오야·플레이어 공통, 이익/손실 배수)</div>
+      <div class="paytable">
+        <div><span>⚀⚀⚀ 핀조로 (1·1·1)</span><span>+5배</span></div>
+        <div><span>⚁⚁⚁~⚅⚅⚅ 조로 (같은 눈 3개)</span><span>+3배</span></div>
+        <div><span>⚃⚄⚅ 시고로 (4·5·6)</span><span>+2배</span></div>
+        <div><span>목 (짝 2개 + 숫자패) — 눈 대결</span><span>승 +1배 / 패 -1배</span></div>
+        <div><span>⚀⚁⚂ 히후미 (1·2·3)</span><span>-2배</span></div>
+        <div><span>무역 (3회 굴려도 조합 없음)</span><span>눈 0으로 대결</span></div>
+        <div><span>오야가 특수패를 내면 내가 반대로 -5/-3/-2배 (히후미면 +2배)</span><span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HORSE -->
+  <div class="panel" id="tab-horse">
+    <h2 class="gt">🐎 경마</h2>
+    <p class="gd">말 한 마리를 골라 배팅하세요. 실제로는 한 경기에 한 마리만 우승하므로 70:50:30:20:10 비율로 우승마를 추첨하고, 승률에 맞춰 배당을 정했습니다 (모든 말의 기대 환수율 약 97%).</p>
+    <div class="horse-pick" id="horsePick"></div>
+    <div class="row">
+      <label>배팅 금액</label>
+      <input type="number" id="horseBet" min="1000" step="1000" value="1000">
+      <button class="btn" onclick="runRace()">경주 시작</button>
+    </div>
+    <div class="msg" id="horseMsg"></div>
+    <div class="track" id="horseTrack"></div>
+  </div>
+
+  <!-- SLOT -->
+  <div class="panel" id="tab-slot">
+    <h2 class="gt">🎰 슬롯머신</h2>
+    <p class="gd">릴 3개를 돌려 같은 그림 3개, 또는 체리 2개를 맞춰보세요. 기대 환수율 약 97.5%.</p>
+    <div class="slot-machine">
+      <div class="reel" id="reel0">🍒</div><div class="reel" id="reel1">🍒</div><div class="reel" id="reel2">🍒</div>
+    </div>
+    <div class="row">
+      <label>배팅 금액</label>
+      <input type="number" id="slotBet" min="1000" step="1000" value="1000">
+      <button class="btn" onclick="spinSlot()">SPIN</button>
+    </div>
+    <div class="msg" id="slotMsg"></div>
+    <div class="card">
+      <div class="paytable">
+        <div><span>7️⃣ 7️⃣ 7️⃣</span><span>300배</span></div>
+        <div><span>💎 💎 💎</span><span>150배</span></div>
+        <div><span>🔔 🔔 🔔</span><span>50배</span></div>
+        <div><span>🍇 🍇 🍇</span><span>25배</span></div>
+        <div><span>🍋 🍋 🍋</span><span>10배</span></div>
+        <div><span>🍒 🍒 🍒</span><span>5배</span></div>
+        <div><span>🍒 🍒 (2개)</span><span>1.5배</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOTTO -->
+  <div class="panel" id="tab-lotto">
+    <h2 class="gt">🎫 복권</h2>
+    <p class="gd">한 장에 1,000원. 마우스(또는 손가락)로 긁거나 버튼으로 한번에 긁어보세요.</p>
+    <div class="rule-box">1등 1% 확률 · 50배 &nbsp;|&nbsp; 2등 5% 확률 · 5.5배 &nbsp;|&nbsp; 3등 10% 확률 · 2배 &nbsp;|&nbsp; 꽝 84% (기대 환수율 97.5%)</div>
+    <div class="row" style="justify-content:center;">
+      <button class="btn" onclick="buyTicket()">🎫 복권 구매 (1,000원)</button>
+      <button class="btn ghost small" onclick="scratchAll()">한번에 긁기</button>
+    </div>
+    <div class="ticket-wrap">
+      <div class="ticket" id="ticket">
+        <div class="ticket-result" id="ticketResult"><div class="t1">🎫</div><div class="t2">복권을 구매하세요</div></div>
+        <canvas class="scratch-canvas" id="scratchCanvas" width="260" height="140"></canvas>
+      </div>
+    </div>
+    <div class="msg" id="lottoMsg" style="text-align:center;"></div>
+  </div>
+
+  <!-- ROULETTE -->
+  <div class="panel" id="tab-roulette">
+    <h2 class="gt">🎡 룰렛</h2>
+    <p class="gd">1~10번 10칸 룰렛. 숫자 적중 9.75배, 색상(빨강 5칸/검정 5칸) 적중 1.95배, 홀/짝 적중 1.95배. 모든 배팅의 기대 환수율이 97.5%로 같습니다.</p>
+    <div class="roulette-wrap"><div class="wheel-pointer">🔻</div><div class="wheel" id="rouletteWheel"></div></div>
+    <div class="bet-type-row">
+      <button class="btn ghost small sel" id="betTypeNumber" onclick="setBetType('number')">숫자 (9.75배)</button>
+      <button class="btn ghost small" id="betTypeColor" onclick="setBetType('color')">색상 (1.95배)</button>
+      <button class="btn ghost small" id="betTypeOE" onclick="setBetType('oddeven')">홀/짝 (1.95배)</button>
+    </div>
+    <div class="num-grid" id="numGrid"></div>
+    <div class="color-grid" id="colorGrid" style="display:none;">
+      <button class="num-btn red" onclick="selectBetValue('red',this)">🔴 빨강</button>
+      <button class="num-btn black" onclick="selectBetValue('black',this)">⚫ 검정</button>
+    </div>
+    <div class="oe-grid" id="oeGrid" style="display:none;">
+      <button class="num-btn" onclick="selectBetValue('odd',this)">홀수</button>
+      <button class="num-btn" onclick="selectBetValue('even',this)">짝수</button>
+    </div>
+    <div class="row">
+      <label>배팅 금액</label>
+      <input type="number" id="rouletteBet" min="1000" step="1000" value="1000">
+      <button class="btn" onclick="spinRoulette()">SPIN</button>
+    </div>
+    <div class="msg" id="rouletteMsg"></div>
+  </div>
+
+  <!-- RANK -->
+  <div class="panel" id="tab-rank">
+    <h2 class="gt">🏆 실시간 순위</h2>
+    <p class="gd">총 자산 = 보유 현금 + 보유 주식·코인 평가액</p>
+    <div class="card" id="boardBox"></div>
+  </div>
+
+<!-- AOJI -->
+  <div class="panel" id="tab-aoji">
+    <h2 class="gt">⛏️ 아오지 탄광</h2>
+    <p class="gd">전 재산을 잃은 사람들이 흘러오는 곳. <b>보유 현금이 5,000원 미만일 때만</b> 입장할 수 있습니다. 곡괭이질 10번마다 1,000원, 1% 확률로 금맥(10,000원)을 캐냅니다.</p>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:56px; margin-bottom:6px;" id="aojiPick">⛏️</div>
+      <button class="btn" style="font-size:20px; padding:16px 30px;" onclick="mineAoji()">곡괭이질 하기</button>
+      <div class="streak-meter" id="aojiMeter" style="justify-content:center; margin-top:16px;"></div>
+      <div class="msg" id="aojiMsg" style="margin-top:10px;">채굴 진행도: 0 / 10</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+<div id="end" class="wrap hidden">
+  <div class="big-title">🏁 게임 종료</div>
+  <div class="card"><div class="lbl2">최종 순위 (총 자산)</div><div id="final"></div></div>
+  <button class="btn block" onclick="newGame()">새 게임</button>
 </div>
 <div class="toast hidden" id="toast"></div>
-
 <script>
+/* ========================= 공통 ========================= */
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString('ko-KR');
-let S = null, es = null, built = false, sess = null;
-try { sess = JSON.parse(localStorage.getItem('sess')); } catch(e) {}
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+let S=null, es=null, sess=null, built=false, hold=false, activeTab='home';
+try{ sess = JSON.parse(localStorage.getItem('sess')); }catch(e){}
 
-function show(id){ ['entry','lobby','game','end'].forEach(x=> $(x).classList.toggle('hidden', x!==id)); }
-let tt; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.remove('hidden'); clearTimeout(tt); tt=setTimeout(()=>t.classList.add('hidden'),2500); }
+function show(id){ ['entry','lobby','app','end'].forEach(x=> $(x).classList.toggle('hidden', x!==id)); }
+let tt; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.remove('hidden'); clearTimeout(tt); tt=setTimeout(()=>t.classList.add('hidden'),2600); }
 async function api(path, body){
   const r = await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const j = await r.json();
@@ -119,14 +596,12 @@ async function api(path, body){
   return j;
 }
 function save(){ try{ localStorage.setItem('sess', JSON.stringify(sess)); }catch(e){} }
-function act(body){ return api('/api/action', Object.assign({code:sess.code, pid:sess.pid}, body)).catch(e=>toast(e.message)); }
+function act(body){ return api('/api/action', Object.assign({code:sess.code, pid:sess.pid}, body)); }
+function gapi(body){ return act(Object.assign({type:'game'}, body)); }
+function release(){ hold=false; if(S) syncTop(); }
 
-async function createRoom(){
-  try{ sess = await api('/api/create',{name:$('nm').value}); save(); connect(); }catch(e){ toast(e.message); }
-}
-async function joinRoom(){
-  try{ sess = await api('/api/join',{name:$('nm').value, code:$('cd').value}); save(); connect(); }catch(e){ toast(e.message); }
-}
+async function createRoom(){ try{ sess = await api('/api/create',{name:$('nm').value}); save(); connect(); }catch(e){ toast(e.message); } }
+async function joinRoom(){ try{ sess = await api('/api/join',{name:$('nm').value, code:$('cd').value}); save(); connect(); }catch(e){ toast(e.message); } }
 function connect(){
   if(es) es.close();
   es = new EventSource('/api/events?code='+sess.code+'&pid='+sess.pid);
@@ -134,56 +609,85 @@ function connect(){
   es.onerror = () => {
     if(es.readyState===EventSource.CLOSED){
       try{ localStorage.removeItem('sess'); }catch(e){}
-      sess = null; show('entry'); toast('방에 다시 접속할 수 없습니다');
+      sess=null; show('entry'); toast('방에 다시 접속할 수 없습니다');
     }
   };
 }
 function copyLink(){
-  const link = location.origin + '/?room=' + S.code;
+  const link = location.origin+'/?room='+S.code;
   (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(()=>toast('초대 링크를 복사했어요'), ()=>prompt('링크를 복사하세요', link));
 }
-function newGame(){ try{ localStorage.removeItem('sess'); }catch(e){} location.href = '/'; }
+function newGame(){ try{ localStorage.removeItem('sess'); }catch(e){} location.href='/'; }
 
 function render(){
   if(S.phase==='lobby'){ show('lobby'); renderLobby(); }
-  else if(S.phase==='playing'){ show('game'); if(!built) build(); update(); }
-  else { show('end'); renderEnd(); }
+  else if(S.phase==='playing'){ show('app'); if(!built) build(); update(); }
+  else { show('end'); $('final').innerHTML = boardHtml(); }
 }
 function renderLobby(){
   $('roomCode').textContent = S.code;
-  $('plCount').textContent = '참가자 ' + S.board.length + ' / 10';
-  $('plList').innerHTML = S.board.map(p =>
-    '<div class="pl"><span class="'+(p.id===S.me.id?'me':'')+'">'+esc(p.name)+(p.id===S.hostId?' 👑':'')+'</span><span class="mut">'+(p.online?'접속 중':'끊김')+'</span></div>').join('');
+  $('plCount').textContent = '참가자 '+S.board.length+' / 10';
+  $('plList').innerHTML = S.board.map(p=>'<div class="pl"><span class="'+(p.id===S.me.id?'me':'')+'">'+esc(p.name)+(p.id===S.hostId?' 👑':'')+'</span><span class="muted">'+(p.online?'접속 중':'끊김')+'</span></div>').join('');
   const host = S.hostId===S.me.id;
   $('startBtn').classList.toggle('hidden', !host);
   $('waitMsg').textContent = host ? '준비되면 시작 버튼을 눌러주세요' : '방장이 시작하길 기다리는 중...';
 }
-function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function clock(t){ return Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); }
+function boardHtml(){
+  const medal=['🥇','🥈','🥉'];
+  return S.board.map((p,i)=>'<div class="pl"><span class="'+(p.id===S.me.id?'me':'')+'"><span class="rank">'+(medal[i]||(i+1))+'</span>'+esc(p.name)+'</span><b>'+fmt(p.total)+'원</b></div>').join('');
+}
 
+/* ========================= 화면 갱신 ========================= */
+function syncTop(){
+  if(!hold){ $('moneyDisplay').textContent = fmt(S.me.money)+'원'; $('totalDisplay').textContent = fmt(S.me.total)+'원'; }
+  $('timerDisplay').textContent = clock(S.timeLeft);
+  $('timerPill').classList.toggle('warn', S.timeLeft<=60);
+}
+function update(){
+  syncTop(); updTable('stock',S.stocks); updTable('coin',S.coins); renderTabExtras();
+  if(!rpsBusy) applyRps(S.me.rps.streak, S.me.rps.pot);
+}
+function switchTab(name){
+  activeTab = name;
+  document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('active', p.id==='tab-'+name));
+  renderTabExtras();
+}
+function renderTabExtras(){
+  if(!S) return;
+  if(activeTab==='home') renderGameStats();
+  if(activeTab==='stock') renderPortfolio('stock');
+  if(activeTab==='coin') renderPortfolio('coin');
+  if(activeTab==='rank') $('boardBox').innerHTML = boardHtml();
+  if(activeTab==='aoji') renderAojiMeter(S.me.aoji);
+}
 function build(){
   built = true;
   ['stock','coin'].forEach(kind=>{
     const list = kind==='stock' ? S.stocks : S.coins;
     $(kind+'Body').innerHTML = list.map((it,i)=>
-      '<tr data-i="'+i+'"><td>'+it.name+'</td><td class="pr"></td><td class="ch"></td><td class="hd"></td>'+
-      '<td><input class="q" type="number" min="1" value="1"></td>'+
-      '<td><button class="mini" data-a="buy">매수</button><button class="mini" data-a="sell">매도</button>'+
+      '<tr data-i="'+i+'"><td class="name">'+it.name+'</td><td class="pr"></td><td class="ch"></td><td class="hd"></td>'+
+      '<td><input class="qtyInput" type="number" min="1" value="1"></td>'+
+      '<td><button class="mini buy" data-a="buy">매수</button><button class="mini sell" data-a="sell">매도</button>'+
       '<button class="mini" data-a="max">최대</button><button class="mini" data-a="all">전량</button></td></tr>').join('');
-    $(kind+'Body').addEventListener('click', e=> onTrade(kind, e));
+    $(kind+'Body').addEventListener('click', e=> onTrade(kind,e));
   });
-  document.querySelectorAll('.tab').forEach(b=> b.onclick = ()=>{
-    document.querySelectorAll('.tab').forEach(x=> x.classList.toggle('on', x===b));
-    ['stock','coin','rank'].forEach(t=> $('p-'+t).classList.toggle('hidden', t!==b.dataset.t));
-  });
+  $('tabs').addEventListener('click', e=>{ const b=e.target.closest('.tab-btn'); if(b) switchTab(b.dataset.tab); });
+  document.querySelectorAll('.game-tile').forEach(t=> t.addEventListener('click', ()=> switchTab(t.dataset.goto)));
+  renderHorsePick(); renderTrackLanes(); buildWheel(); buildNumGrid(); renderAojiMeter(0); updateCupPositions();
+  switchTab('home');
 }
+
+/* ========================= 주식 / 코인 ========================= */
 function onTrade(kind, e){
   const b = e.target.closest('button'); if(!b) return;
-  const tr = b.closest('tr'), i = +tr.dataset.i, q = tr.querySelector('.q');
-  const it = (kind==='stock' ? S.stocks : S.coins)[i];
+  const tr = b.closest('tr'), i = +tr.dataset.i, q = tr.querySelector('.qtyInput');
+  const it = (kind==='stock'?S.stocks:S.coins)[i];
   const h = S.me.holdings[(kind==='stock'?'s':'c')+i];
   if(b.dataset.a==='max'){ q.value = Math.max(1, Math.floor(S.me.money/it.price)); return; }
   if(b.dataset.a==='all'){ q.value = h ? h.qty : 1; return; }
-  act({type:b.dataset.a, kind, idx:i, qty:parseInt(q.value)||1});
+  act({type:b.dataset.a, kind, idx:i, qty:parseInt(q.value)||1}).catch(err=>toast(err.message));
 }
 function updTable(kind, list){
   const tb = $(kind+'Body');
@@ -192,37 +696,305 @@ function updTable(kind, list){
     tr.querySelector('.pr').textContent = it.delisted ? '-' : fmt(it.price)+'원';
     const ch = tr.querySelector('.ch');
     ch.textContent = it.delisted ? '상장폐지' : (it.change>0?'+':'')+it.change+'%';
-    ch.className = 'ch '+(it.delisted?'mut':(it.change>0?'up':(it.change<0?'dn':'')));
+    ch.className = 'ch '+(it.delisted?'muted':(it.change>0?'up':(it.change<0?'down':'')));
     tr.querySelector('.hd').textContent = h ? h.qty : 0;
-    tr.classList.toggle('dead', it.delisted);
+    tr.classList.toggle('delisted', it.delisted);
     tr.querySelectorAll('button').forEach(x=> x.disabled = it.delisted);
   });
 }
-function clock(t){ return Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); }
-function boardHtml(){
-  const medal = ['🥇','🥈','🥉'];
-  return S.board.map((p,i)=>
-    '<div class="pl"><span class="'+(p.id===S.me.id?'me':'')+'"><span class="rank">'+(medal[i]||(i+1))+'</span>'+esc(p.name)+'</span><b>'+fmt(p.total)+'원</b></div>').join('');
+function renderPortfolio(type){
+  const list = type==='stock' ? S.stocks : S.coins, pre = type==='stock' ? 's' : 'c';
+  const box = $(type+'Portfolio');
+  let tE=0, tC=0, tR=0, rows='';
+  list.forEach((it,i)=>{
+    const k = pre+i, h = S.me.holdings[k], rl = S.me.realized[k]||0;
+    if(!h && !rl) return;
+    const qty = h ? h.qty : 0, avg = h ? h.avg : 0;
+    const ev = it.delisted ? 0 : it.price*qty, cost = avg*qty, un = ev-cost;
+    tE+=ev; tC+=cost; tR+=rl;
+    const uc = un>0?'pl-plus':(un<0?'pl-minus':''), rc = rl>0?'pl-plus':(rl<0?'pl-minus':'');
+    rows += '<tr><td class="name">'+it.name+(it.delisted?' <span class="muted">(상장폐지)</span>':'')+'</td><td>'+qty+'</td><td>'+(qty?fmt(avg)+'원':'-')+'</td><td>'+(it.delisted?'-':fmt(it.price)+'원')+'</td><td>'+fmt(ev)+'원</td>'+
+      '<td class="'+uc+'">'+(qty?(un>=0?'+':'')+fmt(un)+'원':'-')+'</td><td class="'+rc+'">'+(rl>=0?'+':'')+fmt(rl)+'원</td></tr>';
+  });
+  if(!rows){ box.innerHTML='<div class="portfolio-title">💼 내 잔고</div><div class="portfolio-empty">보유 중인 '+(type==='stock'?'주식':'코인')+'이 없습니다.</div>'; return; }
+  const tu = tE-tC;
+  box.innerHTML = '<div class="portfolio-title">💼 내 잔고</div><div class="table-scroll" style="max-height:240px;"><table class="market-table"><thead><tr><th>종목</th><th>보유</th><th>평단가</th><th>현재가</th><th>평가금액</th><th>평가손익</th><th>실현손익</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div style="margin-top:8px;font-size:13px;text-align:right;">평가총액 <b>'+fmt(tE)+'원</b> · 평가손익 <span class="'+(tu>0?'pl-plus':(tu<0?'pl-minus':''))+'">'+(tu>=0?'+':'')+fmt(tu)+'원</span> · 실현손익 <span class="'+(tR>0?'pl-plus':(tR<0?'pl-minus':''))+'">'+(tR>=0?'+':'')+fmt(tR)+'원</span></div>';
 }
-function update(){
-  $('gMoney').textContent = fmt(S.me.money)+'원';
-  $('gTotal').textContent = fmt(S.me.total)+'원';
-  $('gTime').textContent = clock(S.timeLeft);
-  updTable('stock', S.stocks); updTable('coin', S.coins);
-  $('board').innerHTML = boardHtml();
-  const keys = Object.keys(S.me.holdings);
-  $('mine').innerHTML = keys.length ? '<table><thead><tr><th>종목</th><th>보유</th><th>평단가</th><th>현재가</th><th>손익</th></tr></thead><tbody>'+
-    keys.map(k=>{
-      const it = (k[0]==='s'?S.stocks:S.coins)[+k.slice(1)], h = S.me.holdings[k];
-      const pl = (it.price-h.avg)*h.qty;
-      return '<tr><td>'+it.name+'</td><td>'+h.qty+'</td><td>'+fmt(h.avg)+'원</td><td>'+fmt(it.price)+'원</td><td class="'+(pl>0?'up':(pl<0?'dn':''))+'">'+(pl>=0?'+':'')+fmt(pl)+'원</td></tr>';
-    }).join('')+'</tbody></table>' : '<div class="mut" style="font-size:13px">보유 중인 종목이 없습니다.</div>';
+function renderGameStats(){
+  const st = S.me.stats;
+  const rows = [['📈 주식',st.stock],['💰 코인',st.coin],['✌️ 가위바위보',st.rps],['🥤 야바위',st.shell],['🎲 친치로',st.chin],['🐎 경마',st.horse],['🎰 슬롯머신',st.slot],['🎫 복권',st.lotto],['🎡 룰렛',st.roulette],['⛏️ 아오지 탄광',st.aoji]];
+  const tot = rows.reduce((s,r)=>s+r[1],0);
+  const cls = v => v>0?'pl-plus':(v<0?'pl-minus':'muted');
+  $('gameStatsBox').innerHTML = '<div class="portfolio-title">📊 내 게임별 손익 현황</div>'+
+    rows.map(r=>'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #241E17;font-size:13px;"><span>'+r[0]+'</span><span class="'+cls(r[1])+'">'+(r[1]>=0?'+':'')+fmt(r[1])+'원</span></div>').join('')+
+    '<div style="display:flex;justify-content:space-between;padding-top:10px;font-size:14px;"><b>전체 합계</b><b class="'+cls(tot)+'">'+(tot>=0?'+':'')+fmt(tot)+'원</b></div>';
 }
-function renderEnd(){ $('final').innerHTML = boardHtml(); }
 
-const qs = new URLSearchParams(location.search).get('room');
-if(qs) $('cd').value = qs.toUpperCase();
+/* ========================= 가위바위보 ========================= */
+let rpsBusy=false;
+const handEmoji={rock:'✊',paper:'✋',scissors:'✌️'}, handName={rock:'바위',paper:'보',scissors:'가위'};
+function setHandButtonsDisabled(f){ ['rpsHandRock','rpsHandPaper','rpsHandScissors'].forEach(id=> $(id).disabled=f); }
+function applyRps(streak, pot){
+  $('rpsStreakBox').classList.toggle('show', streak>0);
+  $('rpsBet').disabled = streak>0;
+  if(streak>0){
+    $('rpsStreakNum').textContent = streak;
+    $('rpsPotDisplay').textContent = fmt(pot)+'원';
+    $('rpsStreakMeter').innerHTML = Array.from({length:10}).map((_,i)=>'<div class="streak-dot '+(i<streak?'on':'')+'"></div>').join('');
+  }
+}
+function chooseHand(hand){
+  if(rpsBusy) return;
+  const streaking = S.me.rps.streak>0;
+  const bet = parseInt($('rpsBet').value)||0;
+  if(!streaking && bet<1000){ toast('최소 배팅 금액은 1,000원입니다.'); return; }
+  rpsBusy=true; hold=true; setHandButtonsDisabled(true); $('rpsMsg').textContent='';
+  const el=$('rpsCountdown'), seq=['가위!','바위!','보!']; let i=0;
+  (function step(){
+    el.textContent = seq[i]; i++;
+    if(i<seq.length) setTimeout(step,420);
+    else setTimeout(async()=>{
+      el.textContent='';
+      try{ const r = await gapi({game:'rps',hand,bet}); showRps(hand,r); }catch(e){ toast(e.message); }
+      rpsBusy=false; setHandButtonsDisabled(false); release();
+    },260);
+  })();
+}
+function showRps(hand, r){
+  const m=$('rpsMsg'), t='나: '+handEmoji[hand]+handName[hand]+' vs 컴퓨터: '+handEmoji[r.cpu]+handName[r.cpu]+' — ';
+  const wasStreak = r.stake && (r.result==='lose') && S.me.rps.streak>0;
+  if(r.result==='win'){ m.className='msg win'; m.textContent = t+(r.auto?'🎉 10연승 달성! '+fmt(r.payout)+'원 자동 수령!':'승리! 현재 '+fmt(r.pot)+'원'); }
+  else if(r.result==='draw'){ m.className='msg'; m.textContent = t+'비겼습니다. 배팅금을 돌려받았습니다. 다시 시도하세요.'; }
+  else { m.className='msg lose'; m.textContent = t+'패배! '+fmt(r.stake)+'원을 잃었습니다.'; }
+  applyRps(r.streak, r.pot);
+}
+function collectRPS(){ gapi({game:'rps',op:'collect'}).then(()=>applyRps(0,0)).catch(e=>toast(e.message)); }
+
+/* ========================= 야바위 ========================= */
+let shellPos=[0,1,2], shellBusy=false;
+function updateCupPositions(){ for(let c=0;c<3;c++) $('cup'+c).style.transform='translateX('+(shellPos.indexOf(c)*130)+'px)'; }
+async function startShell(){
+  if(shellBusy) return;
+  const bet = parseInt($('shellBet').value)||0;
+  shellBusy=true; [0,1,2].forEach(i=> $('shellChoice'+i).disabled=true);
+  let r; try{ r = await gapi({game:'shell',op:'start',bet}); }catch(e){ toast(e.message); shellBusy=false; return; }
+  shellPos=[0,1,2];
+  const marker=$('ballMarker'), ballEl=$('cup'+r.ballCup);
+  $('shellMsg').textContent='공은 '+(r.ballCup+1)+'번 컵에서 시작합니다! 잘 보세요...';
+  [0,1,2].forEach(id=>{ const el=$('cup'+id); el.style.transition='transform .3s ease'; el.style.transform='translateX('+(id*130)+'px)'; });
+  marker.style.transition='none'; marker.style.transform='translateX('+(r.ballCup*130)+'px)'; marker.style.opacity=1;
+  await sleep(150); ballEl.style.transform='translateX('+(r.ballCup*130)+'px) translateY(-70px)';
+  await sleep(1350); ballEl.style.transform='translateX('+(r.ballCup*130)+'px)'; marker.style.opacity=0;
+  $('shellMsg').textContent='셔플 중... 눈을 크게 뜨세요!';
+  await sleep(350);
+  [0,1,2].forEach(id=> $('cup'+id).style.transition='transform .14s linear');
+  for(const [i,j] of r.swaps){ const t=shellPos[i]; shellPos[i]=shellPos[j]; shellPos[j]=t; updateCupPositions(); await sleep(140); }
+  shellBusy=false; $('shellMsg').textContent='컵을 선택하세요!';
+  [0,1,2].forEach(i=> $('shellChoice'+i).disabled=false);
+}
+async function chooseShell(slot){
+  if(shellBusy) return;
+  [0,1,2].forEach(i=> $('shellChoice'+i).disabled=true);
+  try{
+    const r = await gapi({game:'shell',op:'pick',slot});
+    const marker=$('ballMarker'); marker.style.transform='translateX('+(r.ballSlot*130)+'px)'; marker.style.opacity=1;
+    const el=$('cup'+r.ballCup); el.style.transition='transform .35s ease'; el.style.transform='translateX('+(r.ballSlot*130)+'px) translateY(-70px)';
+    $('shellMsg').textContent = r.win ? '정답입니다! '+fmt(r.payout)+'원 획득!' : '꽝! 공은 '+(r.ballSlot+1)+'번 컵에 있었습니다.';
+  }catch(e){ toast(e.message); }
+}
+
+/* ========================= 친치로 ========================= */
+const diceFace={1:'⚀',2:'⚁',3:'⚂',4:'⚃',5:'⚄',6:'⚅'};
+const DASH3='<div class="die">-</div><div class="die">-</div><div class="die">-</div>';
+let chinBusy=false;
+function chinTagText(r){
+  if(r.type==='pinzoro') return '핀조로! (5배)';
+  if(r.type==='zorome') return '조로 ('+r.dice[0]+') (3배)';
+  if(r.type==='shigoro') return '시고로 (2배)';
+  if(r.type==='hifumi') return '히후미 (-2배)';
+  if(r.type==='point') return '목 '+r.point;
+  return '무역 (조합없음)';
+}
+function animateDice(id, finalDice, duration){
+  return new Promise(res=>{
+    const el=$(id), start=Date.now();
+    const iv=setInterval(()=>{
+      el.innerHTML=[0,0,0].map(()=>'<div class="die">'+diceFace[1+Math.floor(Math.random()*6)]+'</div>').join('');
+      if(Date.now()-start>duration){ clearInterval(iv); el.innerHTML=finalDice.map(d=>'<div class="die">'+diceFace[d]+'</div>').join(''); res(); }
+    },70);
+  });
+}
+async function playChinchiro(){
+  if(chinBusy) return;
+  const bet = parseInt($('chinBet').value)||0;
+  chinBusy=true; hold=true;
+  let r; try{ r = await gapi({game:'chin',bet}); }catch(e){ toast(e.message); chinBusy=false; release(); return; }
+  $('chinMsg').textContent=''; $('chinPlayerDice').innerHTML=DASH3; $('chinPlayerTag').textContent='-'; $('chinBankerTag').textContent='굴리는 중...';
+  await animateDice('chinBankerDice', r.banker.dice, 750);
+  $('chinBankerTag').textContent = chinTagText(r.banker);
+  if(r.player){
+    $('chinPlayerTag').textContent='굴리는 중...';
+    await animateDice('chinPlayerDice', r.player.dice, 750);
+    $('chinPlayerTag').textContent = chinTagText(r.player);
+  }
+  const m=$('chinMsg'), net=r.net;
+  if(net>0){ m.className='msg win'; m.textContent='승리! +'+fmt(bet*net)+'원 ('+net+'배)'; }
+  else if(net===0){ m.className='msg'; m.textContent='무승부! 배팅금 반환.'; }
+  else { m.className='msg lose'; m.textContent='패배! -'+fmt(bet*(-net))+'원'+(net<-1?' ('+(-net)+'배 손실)':''); }
+  chinBusy=false; release();
+}
+
+/* ========================= 경마 ========================= */
+const HORSES=[{name:'1번마 번개',w:70,odds:2.5},{name:'2번마 질풍',w:50,odds:3.5},{name:'3번마 태풍',w:30,odds:5.8},{name:'4번마 광풍',w:20,odds:8.8},{name:'5번마 폭풍',w:10,odds:17.5}];
+let selectedHorse=0, horseBusy=false;
+function renderHorsePick(){
+  $('horsePick').innerHTML = HORSES.map((h,i)=>'<div class="horse-opt '+(i===selectedHorse?'sel':'')+'" data-i="'+i+'"><b>'+h.name+'</b>승률 '+(h.w/180*100).toFixed(1)+'% · 배당 '+h.odds+'배</div>').join('');
+  document.querySelectorAll('.horse-opt').forEach(el=> el.addEventListener('click',()=>{ selectedHorse=+el.dataset.i; renderHorsePick(); }));
+}
+function renderTrackLanes(){
+  $('horseTrack').innerHTML = HORSES.map((h,i)=>'<div class="lane"><div class="horse" id="horseLane'+i+'">🐎</div></div>').join('')+'<div class="finish-line"></div>';
+}
+async function runRace(){
+  if(horseBusy) return;
+  const bet=parseInt($('horseBet').value)||0;
+  horseBusy=true; hold=true;
+  let r; try{ r = await gapi({game:'horse',horse:selectedHorse,bet}); }catch(e){ toast(e.message); horseBusy=false; release(); return; }
+  $('horseMsg').className='msg'; $('horseMsg').textContent='경주 중...';
+  renderTrackLanes();
+  const tw=$('horseTrack').offsetWidth-40, wd=2500+Math.random()*300;
+  HORSES.forEach((h,i)=>{
+    const el=$('horseLane'+i), dur=i===r.winner?wd:wd+350+Math.random()*900;
+    requestAnimationFrame(()=>{ el.style.transition='transform '+(dur/1000)+'s linear'; el.style.transform='translateX('+tw+'px) scaleX(-1)'; });
+  });
+  await sleep(wd+400+900+150);
+  const m=$('horseMsg');
+  if(r.winner===selectedHorse){ m.className='msg win'; m.textContent=HORSES[r.winner].name+' 우승! '+fmt(r.win)+'원 획득!'; }
+  else { m.className='msg lose'; m.textContent=HORSES[r.winner].name+' 우승... '+fmt(bet)+'원을 잃었습니다.'; }
+  horseBusy=false; release();
+}
+
+/* ========================= 슬롯머신 ========================= */
+const SLOT_SYMS=['🍒','🍋','🍇','🔔','💎','7️⃣'];
+let slotBusy=false;
+async function spinSlot(){
+  if(slotBusy) return;
+  const bet=parseInt($('slotBet').value)||0;
+  slotBusy=true; hold=true;
+  let r; try{ r = await gapi({game:'slot',bet}); }catch(e){ toast(e.message); slotBusy=false; release(); return; }
+  $('slotMsg').className='msg'; $('slotMsg').textContent='스핀 중...';
+  const durs=[650,950,1300];
+  [0,1,2].forEach(k=>{
+    const el=$('reel'+k), st=Date.now();
+    const iv=setInterval(()=>{ el.textContent=SLOT_SYMS[Math.floor(Math.random()*6)]; if(Date.now()-st>durs[k]){ clearInterval(iv); el.textContent=r.results[k]; } },60);
+  });
+  await sleep(durs[2]+120);
+  const m=$('slotMsg');
+  if(r.win>0){ m.className='msg win'; m.textContent=fmt(r.win)+'원 당첨!'; } else { m.className='msg lose'; m.textContent='꽝! '+fmt(bet)+'원을 잃었습니다.'; }
+  slotBusy=false; release();
+}
+
+/* ========================= 복권 ========================= */
+let ticket=null, ticketRevealed=true, scratching=false;
+async function buyTicket(){
+  release();
+  let r; try{ r = await gapi({game:'lotto'}); }catch(e){ toast(e.message); return; }
+  hold=true; ticket=r; ticketRevealed=false;
+  const info={1:['🎉 1등 당첨!','1,000원 × 50배 = 50,000원'],2:['🥈 2등 당첨!','1,000원 × 5.5배 = 5,500원'],3:['🥉 3등 당첨!','1,000원 × 2배 = 2,000원'],0:['꽝','다음 기회에...']}[r.prize];
+  $('ticketResult').innerHTML='<div class="t1">'+info[0]+'</div><div class="t2">'+info[1]+'</div>';
+  $('lottoMsg').className='msg'; $('lottoMsg').textContent='카드를 긁어 결과를 확인하세요.';
+  setupScratch();
+}
+function setupScratch(){
+  const cv=$('scratchCanvas'), ctx=cv.getContext('2d');
+  ctx.globalCompositeOperation='source-over'; ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#8C7328'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#221A08'; ctx.font='bold 20px sans-serif'; ctx.textAlign='center'; ctx.fillText('은박 카드 - 긁어보세요',cv.width/2,cv.height/2);
+  ctx.globalCompositeOperation='destination-out';
+  const pos=e=>{ const rc=cv.getBoundingClientRect(), t=e.touches?e.touches[0]:e; return [(t.clientX-rc.left)*cv.width/rc.width,(t.clientY-rc.top)*cv.height/rc.height]; };
+  const scratch=(x,y)=>{ ctx.beginPath(); ctx.arc(x,y,16,0,Math.PI*2); ctx.fill(); revealTicket(); };
+  cv.onmousedown=e=>{ scratching=true; scratch(...pos(e)); };
+  cv.onmousemove=e=>{ if(scratching) scratch(...pos(e)); };
+  window.onmouseup=()=>scratching=false;
+  cv.ontouchstart=e=>{ scratching=true; scratch(...pos(e)); e.preventDefault(); };
+  cv.ontouchmove=e=>{ if(scratching) scratch(...pos(e)); e.preventDefault(); };
+  cv.ontouchend=()=>scratching=false;
+}
+function revealTicket(){
+  if(ticketRevealed) return;
+  ticketRevealed=true; release();
+  const m=$('lottoMsg');
+  if(ticket.win>0){ m.className='msg win'; m.textContent=fmt(ticket.win)+'원 당첨금이 지급되었습니다!'; } else { m.className='msg lose'; m.textContent='아쉽게도 꽝입니다.'; }
+}
+function scratchAll(){
+  if(!ticket){ toast('먼저 복권을 구매하세요.'); return; }
+  const cv=$('scratchCanvas'); cv.getContext('2d').clearRect(0,0,cv.width,cv.height); revealTicket();
+}
+
+/* ========================= 룰렛 ========================= */
+const RCOL=['red','red','black','black','red','red','black','black','red','black'];
+const RHEX={red:'#b02226',black:'#1b1b1b'}, RKO={red:'빨강',black:'검정'};
+let rBetType='number', rBetValue=1, rBusy=false, rRot=0;
+function buildWheel(){
+  const w=$('rouletteWheel');
+  w.style.background='conic-gradient('+RCOL.map((c,i)=>RHEX[c]+' '+(i*36)+'deg '+((i+1)*36)+'deg').join(',')+')';
+  w.innerHTML=RCOL.map((c,i)=>'<div class="wheel-num" style="transform:rotate('+(i*36+18)+'deg)">'+(i+1)+'</div>').join('');
+}
+function buildNumGrid(){
+  const g=$('numGrid'); g.innerHTML='';
+  for(let n=1;n<=10;n++){
+    const b=document.createElement('div');
+    b.className='num-btn '+RCOL[n-1]+(rBetValue===n&&rBetType==='number'?' sel':'');
+    b.textContent=n; b.onclick=()=>{ rBetValue=n; buildNumGrid(); };
+    g.appendChild(b);
+  }
+}
+function setBetType(t){
+  rBetType=t; rBetValue=t==='number'?1:null;
+  document.querySelectorAll('#colorGrid .num-btn, #oeGrid .num-btn').forEach(b=>b.classList.remove('sel'));
+  $('betTypeNumber').classList.toggle('sel',t==='number'); $('betTypeColor').classList.toggle('sel',t==='color'); $('betTypeOE').classList.toggle('sel',t==='oddeven');
+  $('numGrid').style.display=t==='number'?'grid':'none'; $('colorGrid').style.display=t==='color'?'flex':'none'; $('oeGrid').style.display=t==='oddeven'?'flex':'none';
+  buildNumGrid();
+}
+function selectBetValue(v,el){
+  rBetValue=v;
+  document.querySelectorAll('#colorGrid .num-btn, #oeGrid .num-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+async function spinRoulette(){
+  if(rBusy) return;
+  if(rBetValue===null){ toast('배팅할 옵션을 선택하세요.'); return; }
+  const bet=parseInt($('rouletteBet').value)||0;
+  rBusy=true; hold=true;
+  let r; try{ r = await gapi({game:'roulette',betType:rBetType,value:rBetValue,bet}); }catch(e){ toast(e.message); rBusy=false; release(); return; }
+  const idx=r.n-1;
+  rRot=Math.ceil(rRot/360)*360+360*5+(360-(idx*36+18));
+  $('rouletteWheel').style.transform='rotate('+rRot+'deg)';
+  $('rouletteMsg').className='msg'; $('rouletteMsg').textContent='돌아가는 중...';
+  await sleep(3050);
+  const col=RCOL[idx], m=$('rouletteMsg'), head='결과: '+r.n+' ('+RKO[col]+', '+(r.n%2?'홀':'짝')+') — ';
+  if(r.win>0){ m.className='msg win'; m.textContent=head+fmt(r.win)+'원 획득!'; } else { m.className='msg lose'; m.textContent=head+fmt(bet)+'원을 잃었습니다.'; }
+  rBusy=false; release();
+}
+
+/* ========================= 아오지 탄광 ========================= */
+function renderAojiMeter(n){ $('aojiMeter').innerHTML=Array.from({length:10}).map((_,i)=>'<div class="streak-dot '+(i<n?'on':'')+'"></div>').join(''); }
+async function mineAoji(){
+  const m=$('aojiMsg'), pick=$('aojiPick');
+  pick.style.transform='rotate(-25deg)'; setTimeout(()=>pick.style.transform='rotate(0deg)',120);
+  try{
+    const r = await gapi({game:'aoji'});
+    renderAojiMeter(r.clicks);
+    if(r.gain>0){ m.className='msg win'; m.textContent = r.gain>=10000 ? '💛 금맥 발견! '+fmt(r.gain)+'원 채굴!' : '⛏️ '+fmt(r.gain)+'원을 채굴했습니다!'; }
+    else { m.className='msg'; m.textContent='채굴 진행도: '+r.clicks+' / 10'; }
+  }catch(e){ m.className='msg lose'; m.textContent=e.message; }
+}
+
+/* ========================= 시작 ========================= */
+const qs=new URLSearchParams(location.search).get('room');
+if(qs) $('cd').value=qs.toUpperCase();
 if(sess) connect();
+
 </script>
 </body>
 </html>

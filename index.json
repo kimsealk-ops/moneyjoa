@@ -1,0 +1,8 @@
+{
+  "name": "asset-game-online",
+  "version": "1.0.0",
+  "description": "자산운영하기 - 온라인 멀티플레이",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

@@ -87,12 +87,28 @@ function tickMarket(room, kind){
 function startGame(room){
   room.phase = 'playing';
   room.timeLeft = GAME_SECONDS;
+  const now = Date.now();
+  for(const p of room.players.values()) p.lastAction = now;
   room.timers = [
     setInterval(()=>{ room.timeLeft--; if(room.timeLeft<=0) endGame(room); else broadcast(room); }, 1000),
     setInterval(()=> tickMarket(room,'s'), 10000),
     setInterval(()=> tickMarket(room,'c'), 5000),
+    setInterval(()=> applyIdlePenalty(room), 1000),
   ];
   broadcast(room);
+}
+// 15초마다 아무 행동도 하지 않은 참가자는 5,000원씩 차감 (방치 방지)
+const IDLE_MS = 15000, IDLE_FINE = 5000;
+function applyIdlePenalty(room){
+  const now = Date.now();
+  let changed = false;
+  for(const p of room.players.values()){
+    if(now - p.lastAction >= IDLE_MS){
+      if(p.money > 0){ p.money = Math.max(0, p.money - IDLE_FINE); changed = true; }
+      p.lastAction += IDLE_MS;
+    }
+  }
+  if(changed) broadcast(room);
 }
 function endGame(room){
   (room.timers||[]).forEach(clearInterval);
@@ -109,7 +125,7 @@ function cleanName(n){
   return n;
 }
 function newPlayer(name){
-  return { name, money:START_MONEY, holdings:{}, realized:{}, online:false, aoji:0, shell:null,
+  return { name, money:START_MONEY, holdings:{}, realized:{}, online:false, aoji:0, shell:null, lastAction:0,
     rps:{pot:0,streak:0}, stats:{rps:0,shell:0,chin:0,horse:0,slot:0,lotto:0,roulette:0,aoji:0} };
 }
 
@@ -157,21 +173,25 @@ function action(body){
     if(!it || it.delisted) throw new Error('거래할 수 없는 종목입니다');
     if(!Number.isInteger(qty) || qty<1 || qty>1e7) throw new Error('수량이 올바르지 않습니다');
     const key = kind+idx;
+    const amount = qty*it.price;
     if(body.type==='buy'){
-      const cost = qty*it.price;
-      if(cost>p.money) throw new Error('돈이 부족합니다');
+      if(amount < TRADE_MIN) throw new Error('최소 주문 금액은 '+TRADE_MIN.toLocaleString('ko-KR')+'원입니다 (잔돈 매매로 무활동 패널티를 피할 수 없도록 제한됩니다)');
+      if(amount>p.money) throw new Error('돈이 부족합니다');
       const h = p.holdings[key] || (p.holdings[key] = {qty:0, avg:0});
-      p.money -= cost;
-      h.avg = (h.avg*h.qty + cost)/(h.qty+qty);
+      p.money -= amount;
+      h.avg = (h.avg*h.qty + amount)/(h.qty+qty);
       h.qty += qty;
     } else {
       const h = p.holdings[key];
       if(!h || qty>h.qty) throw new Error('보유 수량이 부족합니다');
-      p.money += qty*it.price;
+      const isFullSell = qty===h.qty;
+      if(!isFullSell && amount < TRADE_MIN) throw new Error('최소 주문 금액은 '+TRADE_MIN.toLocaleString('ko-KR')+'원입니다 (전량 매도는 금액 제한 없이 가능합니다)');
+      p.money += amount;
       p.realized[key] = (p.realized[key]||0) + (it.price-h.avg)*qty;
       h.qty -= qty;
       if(h.qty===0) delete p.holdings[key];
     }
+    p.lastAction = Date.now();
     broadcast(room);
     return { ok:true };
   }
@@ -180,7 +200,8 @@ function action(body){
 }
 
 // ================= 미니게임 (결과는 전부 서버에서 결정) =================
-const RPS_MULT=1.95, SHELL_MULT=2.2, AOJI_LIMIT=5000;
+const BET_MIN=5000, TRADE_MIN=5000, RPS_MULT=1.95, SHELL_MULT=2.2, AOJI_LIMIT=5000;
+const LOTTO_PRICE=5000;
 const HORSES=[{w:70,odds:2.5},{w:50,odds:3.5},{w:30,odds:5.8},{w:20,odds:8.8},{w:10,odds:17.5}];
 const SLOT_W=[['🍒',30],['🍋',25],['🍇',20],['🔔',12],['💎',8],['7️⃣',5]];
 const SLOT_PAY={'7️⃣':300,'💎':150,'🔔':50,'🍇':25,'🍋':10,'🍒':5};
@@ -207,13 +228,13 @@ function gameAction(room, p, b){
   const before = p.money;
   const bet = +b.bet;
   const chk = ()=>{
-    if(!Number.isInteger(bet) || bet<1000) throw new Error('최소 배팅 금액은 1,000원입니다');
+    if(!Number.isInteger(bet) || bet<BET_MIN) throw new Error('최소 배팅 금액은 '+BET_MIN.toLocaleString('ko-KR')+'원입니다');
     if(bet>p.money) throw new Error('돈이 부족합니다');
   };
   let res = {};
   switch(b.game){
     case 'rps': {
-      if(b.op==='collect'){ p.rps={pot:0,streak:0}; res={pot:0,streak:0}; break; }
+      if(b.op==='collect'){ if(p.rps.streak<=0) throw new Error('수령할 연승 판돈이 없습니다'); p.rps={pot:0,streak:0}; res={pot:0,streak:0}; break; }
       if(!['rock','paper','scissors'].includes(b.hand)) throw new Error('잘못된 요청');
       const streaking = p.rps.streak>0;
       let stake;
@@ -298,10 +319,10 @@ function gameAction(room, p, b){
       break;
     }
     case 'lotto': {
-      if(p.money<1000) throw new Error('돈이 부족합니다');
-      p.money -= 1000;
+      if(p.money<LOTTO_PRICE) throw new Error('돈이 부족합니다');
+      p.money -= LOTTO_PRICE;
       const prize = weightedPick([[1,1],[2,5],[3,10],[0,84]]);
-      const win = Math.round({1:50,2:5.5,3:2,0:0}[prize]*1000);
+      const win = Math.round({1:50,2:5.5,3:2,0:0}[prize]*LOTTO_PRICE);
       p.money += win;
       res = {prize,win};
       break;
@@ -315,8 +336,8 @@ function gameAction(room, p, b){
       const n=1+rnd(10), col=RCOL[n-1];
       let win=0;
       if(t==='number' && v===n) win=Math.round(bet*9.75);
-      if(t==='color' && v===col) win=Math.round(bet*1.95);
-      if(t==='oddeven' && v===(n%2?'odd':'even')) win=Math.round(bet*1.95);
+      if(t==='color' && v===col) win=Math.round(bet*1.9);
+      if(t==='oddeven' && v===(n%2?'odd':'even')) win=Math.round(bet*1.9);
       p.money += win;
       res = {n,win};
       break;
@@ -332,6 +353,7 @@ function gameAction(room, p, b){
     default: throw new Error('알 수 없는 게임입니다');
   }
   p.stats[b.game] += p.money - before;
+  p.lastAction = Date.now();
   broadcast(room);
   return Object.assign({ok:true}, res);
 }

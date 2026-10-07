@@ -257,6 +257,11 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
 .me{color:var(--gold);font-weight:600}
 .rank{font-family:var(--font-head);width:34px;display:inline-block}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2A2219;border:1px solid var(--gold);padding:10px 16px;border-radius:10px;font-size:14px;z-index:99}
+.idle-warn{position:sticky;top:0;z-index:20;background:#5a1f1f;border-bottom:1px solid var(--red);color:#ffdede;text-align:center;font-size:13px;font-weight:600;padding:8px 10px;animation:idlePulse 1s infinite}
+.rule-list div{font-size:12.5px;color:var(--muted);line-height:1.6;padding:7px 0;border-bottom:1px solid #241E17}
+.rule-list div:last-child{border-bottom:0}
+.rule-list b{color:var(--text)}
+@keyframes idlePulse{0%,100%{opacity:1}50%{opacity:.55}}
 </style>
 </head>
 <body>
@@ -282,10 +287,21 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
     <button class="btn ghost block" onclick="copyLink()">초대 링크 복사</button>
   </div>
   <div class="card"><div class="lbl2" id="plCount"></div><div id="plList"></div></div>
+  <div class="card">
+    <div class="lbl2" style="font-size:14px;color:var(--gold);margin-bottom:10px;">📖 게임 방법</div>
+    <div class="rule-list">
+      <div><b>🎯 목표</b> — 시작 자금 100,000원으로 10분 안에 <b>총자산(현금 + 보유 주식·코인 평가액)</b>을 가장 많이 불리면 승리.</div>
+      <div><b>⏱️ 무활동 패널티</b> — 게임 시작 후 <b>15초 동안 아무 거래·베팅도 하지 않으면 5,000원이 자동 차감</b>돼요. 차감 5초 전부터 화면 위에 경고가 뜨니, 그 전에 아무 행동이나 하면 초기화돼요. 방치 방지용이라 계속 안 움직이면 계속 깎여요.</div>
+      <div><b>📈 주식 · 🪙 코인</b> — 30개 종목, 각각 10초/5초마다 가격이 변동해요. 1회 매수·매도 최소 5,000원, <b>매수 후 20초가 지나야 같은 종목을 매도</b>할 수 있어요 (즉시 되팔기 방지).</div>
+      <div><b>🎮 미니게임</b> — 가위바위보 · 야바위 · 친치로 · 경마 · 슬롯머신 · 복권 · 룰렛 · 아오지 탄광(현금 5,000원 미만일 때만). 미니게임 최소 배팅은 5,000원이에요.</div>
+      <div><b>🏆 순위</b> — 상단 🏆 순위 탭에서 전원의 총자산과 무활동 패널티 누적액을 실시간으로 볼 수 있어요.</div>
+    </div>
+  </div>
   <button class="btn block" id="startBtn" onclick="act({type:'start'}).catch(e=>toast(e.message))">게임 시작</button>
   <div class="sub" id="waitMsg" style="margin-top:10px"></div>
 </div>
 <div id="app" class="hidden">
+<div class="idle-warn hidden" id="idleWarn">⚠️ <span id="idleWarnText">5초 후 5,000원이 차감됩니다! 즉시 자산활동을 시작하세요.</span></div>
 <div class="topbar">
   <div class="brand">💰 <span class="tx">자산운영하기</span><small>10분 안에 자산을 불려라</small></div>
   <div class="stats">
@@ -355,7 +371,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
     <h2 class="gt">📈 주식 시장</h2>
     <p class="gd">30개 종목, 10초마다 가격이 변동합니다.</p>
     <div class="rule-box">
-      가격 변동폭은 <b>±1% / ±5% / ±10% / ±50% / 상장폐지</b> 중 하나가 <b>가중치 70 : 20 : 50 : 3 : 1</b> 비율로 뽑힙니다 (합이 100%를 넘어 상대 가중치로 정규화). 상장폐지되면 보유 주식은 전량 소각됩니다. 상장폐지 위험을 보정해 상승 확률이 약 56%로 설정되어 있어, 10분 내내 보유했을 때 기대값은 약 97.5%입니다. <b>한 번 주문에 5,000원 이상</b>만 매수할 수 있고, 매도는 전량 매도가 아니면 역시 5,000원 이상이어야 합니다 (잔돈 매매 반복 방지).
+      가격 변동폭은 <b>±1% / ±5% / ±10% / ±50% / 상장폐지</b> 중 하나가 <b>가중치 70 : 20 : 50 : 3 : 1</b> 비율로 뽑힙니다 (합이 100%를 넘어 상대 가중치로 정규화). 상장폐지되면 보유 주식은 전량 소각됩니다. 상장폐지 위험을 보정해 상승 확률이 약 56%로 설정되어 있어, 10분 내내 보유했을 때 기대값은 약 97.5%입니다. <b>한 번 주문에 5,000원 이상</b>만 매수할 수 있고, 매도는 전량 매도가 아니면 역시 5,000원 이상이어야 합니다. 또한 <b>매수 후 20초가 지나야 같은 종목을 매도</b>할 수 있어 즉시 되팔기로 무활동 패널티를 피할 수 없습니다.
     </div>
     <div class="card" id="stockPortfolio"></div>
     <div class="table-scroll">
@@ -371,7 +387,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
     <h2 class="gt">🪙 코인 거래소</h2>
     <p class="gd">30개 코인, 5초마다 가격이 변동합니다. 주식보다 훨씬 변동성이 큽니다.</p>
     <div class="rule-box">
-      가격 변동폭은 <b>±5% / ±10% / ±50% / 상장폐지</b> 중 하나가 <b>가중치 20 : 50 : 5 : 1</b> 비율로 뽑힙니다. 상장폐지 위험을 보정해 상승 확률이 약 56%로 설정되어 있어, 10분 내내 보유했을 때 기대값은 약 97.5%입니다. <b>한 번 주문에 5,000원 이상</b>만 매수할 수 있고, 매도는 전량 매도가 아니면 역시 5,000원 이상이어야 합니다 (잔돈 매매 반복 방지).
+      가격 변동폭은 <b>±5% / ±10% / ±50% / 상장폐지</b> 중 하나가 <b>가중치 20 : 50 : 5 : 1</b> 비율로 뽑힙니다. 상장폐지 위험을 보정해 상승 확률이 약 56%로 설정되어 있어, 10분 내내 보유했을 때 기대값은 약 97.5%입니다. <b>한 번 주문에 5,000원 이상</b>만 매수할 수 있고, 매도는 전량 매도가 아니면 역시 5,000원 이상이어야 합니다. 또한 <b>매수 후 20초가 지나야 같은 종목을 매도</b>할 수 있어 즉시 되팔기로 무활동 패널티를 피할 수 없습니다.
     </div>
     <div class="card" id="coinPortfolio"></div>
     <div class="table-scroll">
@@ -637,7 +653,10 @@ function renderLobby(){
 function clock(t){ return Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); }
 function boardHtml(){
   const medal=['🥇','🥈','🥉'];
-  return S.board.map((p,i)=>'<div class="pl"><span class="'+(p.id===S.me.id?'me':'')+'"><span class="rank">'+(medal[i]||(i+1))+'</span>'+esc(p.name)+'</span><b>'+fmt(p.total)+'원</b></div>').join('');
+  return S.board.map((p,i)=>{
+    const idleLine = p.idleTotal>0 ? '<div style="font-size:11px;color:var(--blue);text-align:right;">⏱️ 무활동 패널티 누적 -'+fmt(p.idleTotal)+'원</div>' : '';
+    return '<div class="pl"><span class="'+(p.id===S.me.id?'me':'')+'"><span class="rank">'+(medal[i]||(i+1))+'</span>'+esc(p.name)+(p.online?'':' <span class="mut">(끊김)</span>')+'</span><div style="text-align:right;"><b>'+fmt(p.total)+'원</b>'+idleLine+'</div></div>';
+  }).join('');
 }
 
 /* ========================= 화면 갱신 ========================= */
@@ -645,6 +664,14 @@ function syncTop(){
   if(!hold){ $('moneyDisplay').textContent = fmt(S.me.money)+'원'; $('totalDisplay').textContent = fmt(S.me.total)+'원'; }
   $('timerDisplay').textContent = clock(S.timeLeft);
   $('timerPill').classList.toggle('warn', S.timeLeft<=60);
+  const secLeft = Math.ceil((S.me.idleMsLeft||99999)/1000);
+  const warn = $('idleWarn');
+  if(S.phase==='playing' && S.me.idleMsLeft>0 && S.me.idleMsLeft<=5000){
+    warn.classList.remove('hidden');
+    $('idleWarnText').textContent = secLeft+'초 후 5,000원이 차감됩니다! 즉시 자산활동을 시작하세요.';
+  } else {
+    warn.classList.add('hidden');
+  }
 }
 function update(){
   syncTop(); updTable('stock',S.stocks); updTable('coin',S.coins); renderTabExtras();

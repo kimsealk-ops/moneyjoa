@@ -55,11 +55,12 @@ function statsOf(room, p){
 }
 function snapshot(room, pid){
   const me = room.players.get(pid);
-  const board = [...room.players.entries()].map(([id,p])=>({id, name:p.name, total:Math.round(totalOf(room,p)), online:p.online}))
+  const board = [...room.players.entries()].map(([id,p])=>({id, name:p.name, total:Math.round(totalOf(room,p)), online:p.online, idleTotal:p.idleTotal||0}))
     .sort((a,b)=>b.total-a.total);
+  const idleMsLeft = room.phase==='playing' ? Math.max(0, IDLE_MS - (Date.now() - (me.lastAction||0))) : IDLE_MS;
   return { code:room.code, phase:room.phase, timeLeft:room.timeLeft, hostId:room.hostId,
     me:{ id:pid, name:me.name, money:me.money, holdings:me.holdings, realized:me.realized, total:Math.round(totalOf(room,me)),
-      rps:me.rps, aoji:me.aoji, stats:statsOf(room,me) },
+      rps:me.rps, aoji:me.aoji, stats:statsOf(room,me), idleMsLeft, idleTotal:me.idleTotal||0 },
     board, stocks:room.stocks, coins:room.coins };
 }
 function broadcast(room){
@@ -104,7 +105,12 @@ function applyIdlePenalty(room){
   let changed = false;
   for(const p of room.players.values()){
     if(now - p.lastAction >= IDLE_MS){
-      if(p.money > 0){ p.money = Math.max(0, p.money - IDLE_FINE); changed = true; }
+      if(p.money > 0){
+        const deducted = Math.min(IDLE_FINE, p.money);
+        p.money -= deducted;
+        p.idleTotal += deducted;
+        changed = true;
+      }
       p.lastAction += IDLE_MS;
     }
   }
@@ -125,7 +131,7 @@ function cleanName(n){
   return n;
 }
 function newPlayer(name){
-  return { name, money:START_MONEY, holdings:{}, realized:{}, online:false, aoji:0, shell:null, lastAction:0,
+  return { name, money:START_MONEY, holdings:{}, realized:{}, online:false, aoji:0, shell:null, lastAction:0, idleTotal:0,
     rps:{pot:0,streak:0}, stats:{rps:0,shell:0,chin:0,horse:0,slot:0,lotto:0,roulette:0,aoji:0} };
 }
 
@@ -177,13 +183,18 @@ function action(body){
     if(body.type==='buy'){
       if(amount < TRADE_MIN) throw new Error('최소 주문 금액은 '+TRADE_MIN.toLocaleString('ko-KR')+'원입니다 (잔돈 매매로 무활동 패널티를 피할 수 없도록 제한됩니다)');
       if(amount>p.money) throw new Error('돈이 부족합니다');
-      const h = p.holdings[key] || (p.holdings[key] = {qty:0, avg:0});
+      const h = p.holdings[key] || (p.holdings[key] = {qty:0, avg:0, lastBuyAt:0});
       p.money -= amount;
       h.avg = (h.avg*h.qty + amount)/(h.qty+qty);
       h.qty += qty;
+      h.lastBuyAt = Date.now();
     } else {
       const h = p.holdings[key];
       if(!h || qty>h.qty) throw new Error('보유 수량이 부족합니다');
+      const heldMs = Date.now() - (h.lastBuyAt||0);
+      if(heldMs < HOLD_MIN_MS){
+        throw new Error('매수 후 '+Math.ceil((HOLD_MIN_MS-heldMs)/1000)+'초 더 지나야 매도할 수 있습니다 (즉시 되팔기로 무활동 패널티를 피하는 것을 막기 위함입니다)');
+      }
       const isFullSell = qty===h.qty;
       if(!isFullSell && amount < TRADE_MIN) throw new Error('최소 주문 금액은 '+TRADE_MIN.toLocaleString('ko-KR')+'원입니다 (전량 매도는 금액 제한 없이 가능합니다)');
       p.money += amount;
@@ -200,7 +211,7 @@ function action(body){
 }
 
 // ================= 미니게임 (결과는 전부 서버에서 결정) =================
-const BET_MIN=5000, TRADE_MIN=5000, RPS_MULT=1.95, SHELL_MULT=2.2, AOJI_LIMIT=5000;
+const BET_MIN=5000, TRADE_MIN=5000, HOLD_MIN_MS=20000, RPS_MULT=1.95, SHELL_MULT=2.2, AOJI_LIMIT=5000;
 const LOTTO_PRICE=5000;
 const HORSES=[{w:70,odds:2.5},{w:50,odds:3.5},{w:30,odds:5.8},{w:20,odds:8.8},{w:10,odds:17.5}];
 const SLOT_W=[['🍒',30],['🍋',25],['🍇',20],['🔔',12],['💎',8],['7️⃣',5]];

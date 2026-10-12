@@ -55,12 +55,12 @@ function statsOf(room, p){
 }
 function snapshot(room, pid){
   const me = room.players.get(pid);
-  const board = [...room.players.entries()].map(([id,p])=>({id, name:p.name, total:Math.round(totalOf(room,p)), online:p.online, idleTotal:p.idleTotal||0}))
+  const board = [...room.players.entries()].map(([id,p])=>({id, name:p.name, total:Math.round(totalOf(room,p)), online:p.online, idleTotal:p.idleTotal||0, stats:statsOf(room,p)}))
     .sort((a,b)=>b.total-a.total);
   const idleMsLeft = room.phase==='playing' ? Math.max(0, IDLE_MS - (Date.now() - (me.lastAction||0))) : IDLE_MS;
   return { code:room.code, phase:room.phase, timeLeft:room.timeLeft, hostId:room.hostId,
     me:{ id:pid, name:me.name, money:me.money, holdings:me.holdings, realized:me.realized, total:Math.round(totalOf(room,me)),
-      rps:me.rps, aoji:me.aoji, stats:statsOf(room,me), idleMsLeft, idleTotal:me.idleTotal||0 },
+      rps:me.rps, aoji:me.aoji, cards:me.cards, stats:statsOf(room,me), idleMsLeft, idleTotal:me.idleTotal||0 },
     board, stocks:room.stocks, coins:room.coins };
 }
 function broadcast(room){
@@ -132,7 +132,7 @@ function cleanName(n){
 }
 function newPlayer(name){
   return { name, money:START_MONEY, holdings:{}, realized:{}, online:false, aoji:0, shell:null, lastAction:0, idleTotal:0,
-    rps:{pot:0,streak:0}, stats:{rps:0,shell:0,chin:0,horse:0,slot:0,lotto:0,roulette:0,aoji:0} };
+    rps:{pot:0,streak:0}, stats:{rps:0,shell:0,chin:0,horse:0,slot:0,lotto:0,roulette:0,aoji:0,gacha:0}, cards:{} };
 }
 
 function create(body){
@@ -213,6 +213,10 @@ function action(body){
 // ================= 미니게임 (결과는 전부 서버에서 결정) =================
 const BET_MIN=5000, TRADE_MIN=5000, HOLD_MIN_MS=20000, RPS_MULT=1.95, SHELL_MULT=2.2, AOJI_LIMIT=5000;
 const LOTTO_PRICE=5000;
+// 카드깡: 팩 5,000원 / 뽑는 즉시 카드 가치만큼 환전 (기대 환수율 97.5%)
+const GACHA_PRICE=5000;
+const SHELL_PICK_MS=5000; // 야바위: 셔플이 끝난 뒤 컵을 고를 수 있는 시간
+const GACHA_TIERS=[{id:'N',p:58,value:1500,n:4},{id:'R',p:28,value:4000,n:3},{id:'SR',p:10,value:12000,n:3},{id:'SSR',p:3.5,value:31000,n:3},{id:'UR',p:0.5,value:120000,n:2}];
 const HORSES=[{w:70,odds:2.5},{w:50,odds:3.5},{w:30,odds:5.8},{w:20,odds:8.8},{w:10,odds:17.5}];
 const SLOT_W=[['🍒',30],['🍋',25],['🍇',20],['🔔',12],['💎',8],['7️⃣',5]];
 const SLOT_PAY={'7️⃣':300,'💎':150,'🔔':50,'🍇':25,'🍋':10,'🍒':5};
@@ -270,14 +274,20 @@ function gameAction(room, p, b){
     case 'shell': {
       if(b.op==='start'){
         chk();
-        if(p.shell && Date.now()-p.shell.t<30000) throw new Error('진행 중인 야바위가 있습니다');
+        if(p.shell && Date.now()<p.shell.deadline) throw new Error('진행 중인 야바위가 있습니다');
         p.money -= bet;
         const ballCup=rnd(3), pos=[0,1,2], swaps=[], n=16+rnd(8);
         for(let k=0;k<n;k++){ const i=rnd(3); let j=rnd(3); while(j===i) j=rnd(3); [pos[i],pos[j]]=[pos[j],pos[i]]; swaps.push([i,j]); }
-        p.shell = {bet,ballCup,pos,t:Date.now()};
+        p.shell = {bet,ballCup,pos,t:Date.now(),deadline:Date.now()+1850+n*140+SHELL_PICK_MS+1500};
         res = {ballCup,swaps};
       } else {
         if(!p.shell) throw new Error('진행 중인 게임이 없습니다');
+        const sh0=p.shell;
+        if(b.op==='timeout' || Date.now()>sh0.deadline){
+          p.shell=null; // 시간 초과: 이미 차감된 배팅금은 돌려받지 못함
+          res = {win:false,timeout:true,payout:0,ballCup:sh0.ballCup,ballSlot:sh0.pos.indexOf(sh0.ballCup),bet:sh0.bet};
+          break;
+        }
         const sl=+b.slot;
         if(![0,1,2].includes(sl)) throw new Error('잘못된 요청');
         const sh=p.shell; p.shell=null;
@@ -351,6 +361,18 @@ function gameAction(room, p, b){
       if(t==='oddeven' && v===(n%2?'odd':'even')) win=Math.round(bet*1.9);
       p.money += win;
       res = {n,win};
+      break;
+    }
+    case 'gacha': {
+      if(p.money<GACHA_PRICE) throw new Error('돈이 부족합니다');
+      p.money -= GACHA_PRICE;
+      const tid = weightedPick(GACHA_TIERS.map(t=>[t.id,t.p]));
+      const tier = GACHA_TIERS.find(t=>t.id===tid);
+      const idx = rnd(tier.n);
+      p.money += tier.value;
+      const key = tid+idx;
+      p.cards[key] = (p.cards[key]||0)+1;
+      res = {tier:tid, idx, value:tier.value};
       break;
     }
     case 'aoji': {

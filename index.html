@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>자산운영하기 온라인</title>
+<title>무념무상</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -258,6 +258,25 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
 .rank{font-family:var(--font-head);width:34px;display:inline-block}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2A2219;border:1px solid var(--gold);padding:10px 16px;border-radius:10px;font-size:14px;z-index:99}
 .idle-warn{position:sticky;top:0;z-index:20;background:#5a1f1f;border-bottom:1px solid var(--red);color:#ffdede;text-align:center;font-size:13px;font-weight:600;padding:8px 10px;animation:idlePulse 1s infinite}
+.pcard{width:170px;height:240px;border-radius:14px;border:3px solid var(--rc,#555);background:linear-gradient(160deg,var(--rc2,#222),#151210 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 0 16px var(--rc,#000);text-align:center}
+.pcard.back{--rc:#8C7328;--rc2:#2a2219}
+.pcard .pe{font-size:68px;line-height:1}
+.pcard .pn{font-family:var(--font-head);font-size:19px}
+.pcard .pt{font-size:12px;font-weight:700;letter-spacing:2px;color:var(--rc)}
+.pcard .pv{font-size:13px;color:var(--muted)}
+.pcard .ps{font-size:11px;color:var(--muted);padding:0 8px}
+.pcard.shake{animation:shake .12s infinite}
+.pcard.pop{animation:pop .45s ease}
+.pcard.big{animation:pop .45s ease,glow 1s ease-in-out infinite alternate}
+@keyframes shake{0%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}100%{transform:rotate(-4deg)}}
+@keyframes pop{0%{transform:scale(.3) rotateY(90deg);opacity:0}100%{transform:scale(1) rotateY(0);opacity:1}}
+@keyframes glow{from{box-shadow:0 0 14px var(--rc)}to{box-shadow:0 0 38px var(--rc),0 0 60px var(--rc)}}
+.coll-tier{margin-bottom:10px}
+.coll-tier .ct{font-size:12px;font-weight:700;margin-bottom:4px}
+.coll-row{display:flex;gap:6px;flex-wrap:wrap}
+.coll-card{width:74px;padding:6px 2px;border-radius:8px;border:1px solid #382E22;background:#221D17;text-align:center;font-size:10.5px}
+.coll-card .ce{font-size:26px}
+.coll-card.none{opacity:.35}
 .rule-list div{font-size:12.5px;color:var(--muted);line-height:1.6;padding:7px 0;border-bottom:1px solid #241E17}
 .rule-list div:last-child{border-bottom:0}
 .rule-list b{color:var(--text)}
@@ -266,7 +285,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
 </head>
 <body>
 <div id="entry" class="wrap">
-  <div class="big-title">💰 자산운영하기</div>
+  <div class="big-title">💰 무념무상</div>
   <div class="sub">10분 안에 자산을 불려라 · 최대 10명 온라인 대결</div>
   <div class="card">
     <div class="lbl2">닉네임 (최대 10자)</div>
@@ -293,7 +312,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
       <div><b>🎯 목표</b> — 시작 자금 100,000원으로 10분 안에 <b>총자산(현금 + 보유 주식·코인 평가액)</b>을 가장 많이 불리면 승리.</div>
       <div><b>⏱️ 무활동 패널티</b> — 게임 시작 후 <b>15초 동안 아무 거래·베팅도 하지 않으면 5,000원이 자동 차감</b>돼요. 차감 5초 전부터 화면 위에 경고가 뜨니, 그 전에 아무 행동이나 하면 초기화돼요. 방치 방지용이라 계속 안 움직이면 계속 깎여요.</div>
       <div><b>📈 주식 · 🪙 코인</b> — 30개 종목, 각각 10초/5초마다 가격이 변동해요. 1회 매수·매도 최소 5,000원, <b>매수 후 20초가 지나야 같은 종목을 매도</b>할 수 있어요 (즉시 되팔기 방지).</div>
-      <div><b>🎮 미니게임</b> — 가위바위보 · 야바위 · 친치로 · 경마 · 슬롯머신 · 복권 · 룰렛 · 아오지 탄광(현금 5,000원 미만일 때만). 미니게임 최소 배팅은 5,000원이에요.</div>
+      <div><b>🎮 미니게임</b> — 가위바위보 · 야바위 · 친치로 · 경마 · 슬롯머신 · 복권 · 룰렛 · 카드깡(팩 5,000원) · 아오지 탄광(현금 5,000원 미만일 때만). 미니게임 최소 배팅은 5,000원이에요.</div>
       <div><b>🏆 순위</b> — 상단 🏆 순위 탭에서 전원의 총자산과 무활동 패널티 누적액을 실시간으로 볼 수 있어요.</div>
     </div>
   </div>
@@ -303,7 +322,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
 <div id="app" class="hidden">
 <div class="idle-warn hidden" id="idleWarn">⚠️ <span id="idleWarnText">5초 후 5,000원이 차감됩니다! 즉시 자산활동을 시작하세요.</span></div>
 <div class="topbar">
-  <div class="brand">💰 <span class="tx">자산운영하기</span><small>10분 안에 자산을 불려라</small></div>
+  <div class="brand">💰 <span class="tx">무념무상</span><small>10분 안에 자산을 불려라</small></div>
   <div class="stats">
     <div class="pill money"><span class="lbl">보유 자산</span><span class="val" id="moneyDisplay">100,000원</span></div>
     <div class="pill"><span class="lbl">총 자산</span><span class="val" id="totalDisplay">100,000원</span></div>
@@ -323,6 +342,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
   <button class="tab-btn" data-tab="slot">🎰 슬롯머신</button>
   <button class="tab-btn" data-tab="lotto">🎫 복권</button>
   <button class="tab-btn" data-tab="roulette">🎡 룰렛</button>
+  <button class="tab-btn" data-tab="gacha">🃏 카드깡</button>
   <button class="tab-btn" data-tab="aoji">⛏️ 아오지 탄광</button>
   <button class="tab-btn" data-tab="rank">🏆 순위</button>
 </div>
@@ -332,7 +352,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
   <!-- HOME -->
   <div class="panel active" id="tab-home">
     <div class="home-hero">
-      <div class="big">자산운영하기</div>
+      <div class="big">무념무상</div>
       <p>주식·코인 투자부터 가위바위보, 야바위, 친치로, 경마, 슬롯머신, 복권, 룰렛까지 — 제한시간 10분, 최대 10명이 같은 시세를 보며 겨루는 온라인 대결입니다.</p>
     </div>
     <div class="game-grid">
@@ -345,6 +365,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
       <div class="game-tile" data-goto="slot"><div class="ic">🎰</div><div class="nm">슬롯머신</div></div>
       <div class="game-tile" data-goto="lotto"><div class="ic">🎫</div><div class="nm">복권</div></div>
       <div class="game-tile" data-goto="roulette"><div class="ic">🎡</div><div class="nm">룰렛</div></div>
+      <div class="game-tile" data-goto="gacha"><div class="ic">🃏</div><div class="nm">카드깡</div></div>
       <div class="game-tile" data-goto="aoji"><div class="ic">⛏️</div><div class="nm">아오지 탄광</div></div>
     </div>
     <div class="card" id="gameStatsBox" style="margin-top:20px;"></div>
@@ -360,6 +381,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
         <div><span>🎫 복권</span><span>97.5%</span></div>
         <div><span>🎡 룰렛 — 숫자</span><span>97.5%</span></div>
         <div><span>🎡 룰렛 — 색상/홀짝</span><span>95%</span></div>
+        <div><span>🃏 카드깡 (팩 5,000원, 즉시 환전)</span><span>97.5%</span></div>
         <div><span>⛏️ 아오지 탄광 (현금 5,000원 미만 한정)</span><span>구제용</span></div>
       </div>
       <div class="sub" style="margin-top:8px; text-align:left;">⏱️ 15초 동안 아무 행동도 하지 않으면 5,000원씩 자동 차감됩니다. 거래나 게임 버튼을 누르면 초기화돼요.</div>
@@ -426,7 +448,7 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
   <!-- SHELL -->
   <div class="panel" id="tab-shell">
     <h2 class="gt">🥤 야바위</h2>
-    <p class="gd">공이 든 컵을 맞추면 배팅금의 2.2배! (찍기만 하면 불리하고, 눈으로 따라가면 유리한 실력 게임) 컵이 아주 빠르게 뒤섞이니 눈을 부릅뜨세요.</p>
+    <p class="gd">공이 든 컵을 맞추면 배팅금의 2.2배! (찍기만 하면 불리하고, 눈으로 따라가면 유리한 실력 게임) <b>셔플이 끝나면 5초 안에 컵을 골라야 하며, 시간이 지나면 배팅금을 잃어요.</b> 컵이 아주 빠르게 뒤섞이니 눈을 부릅뜨세요.</p>
     <div class="card">
       <div class="row">
         <label>배팅 금액</label>
@@ -568,10 +590,23 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
     <div class="msg" id="rouletteMsg"></div>
   </div>
 
+  <!-- GACHA -->
+  <div class="panel" id="tab-gacha">
+    <h2 class="gt">🃏 카드깡</h2>
+    <p class="gd">한 팩 5,000원. 뽑은 카드는 가치만큼 바로 현금으로 환전돼요. 사냥터 몬스터부터 전설 보스까지, 오리지널 카드 15종을 모아보세요.</p>
+    <div class="rule-box">
+      일반 58% · 1,500원 &nbsp;|&nbsp; 레어 28% · 4,000원 &nbsp;|&nbsp; 슈퍼레어 10% · 12,000원 &nbsp;|&nbsp; SSR 3.5% · 31,000원 &nbsp;|&nbsp; <b>울트라레어 0.5% · 120,000원</b> (기대 환수율 97.5%)
+    </div>
+    <div style="text-align:center;margin:10px 0 6px;"><button class="btn" onclick="buyPack()">🃏 카드팩 뽑기 (5,000원)</button></div>
+    <div id="gachaStage" style="min-height:270px;display:flex;align-items:center;justify-content:center;"><div class="pcard back"><div class="pe">❓</div></div></div>
+    <div class="msg" id="gachaMsg" style="text-align:center;"></div>
+    <div class="card"><div class="portfolio-title">📚 내 도감</div><div id="collection"></div></div>
+  </div>
+
   <!-- RANK -->
   <div class="panel" id="tab-rank">
     <h2 class="gt">🏆 실시간 순위</h2>
-    <p class="gd">총 자산 = 보유 현금 + 보유 주식·코인 평가액</p>
+    <p class="gd">총 자산 = 보유 현금 + 보유 주식·코인 평가액. 이름을 누르면 그 사람이 게임별로 얼마를 벌고 잃었는지 볼 수 있어요.</p>
     <div class="card" id="boardBox"></div>
   </div>
 
@@ -592,7 +627,8 @@ input[type=text]{background:var(--panel2);border:1px solid var(--border);color:v
 </div>
 <div id="end" class="wrap hidden">
   <div class="big-title">🏁 게임 종료</div>
-  <div class="card"><div class="lbl2">최종 순위 (총 자산)</div><div id="final"></div></div>
+  <div class="card"><div class="lbl2">최종 순위 (총 자산) · 이름을 누르면 게임별 손익을 볼 수 있어요</div><div id="final"></div></div>
+  <div class="card" id="finalDetail"></div>
   <button class="btn block" onclick="newGame()">새 게임</button>
 </div>
 <div class="toast hidden" id="toast"></div>
@@ -640,7 +676,7 @@ function newGame(){ try{ localStorage.removeItem('sess'); }catch(e){} location.h
 function render(){
   if(S.phase==='lobby'){ show('lobby'); renderLobby(); }
   else if(S.phase==='playing'){ show('app'); if(!built) build(); update(); }
-  else { show('end'); $('final').innerHTML = boardHtml(); }
+  else { show('end'); renderEnd(); }
 }
 function renderLobby(){
   $('roomCode').textContent = S.code;
@@ -649,6 +685,38 @@ function renderLobby(){
   const host = S.hostId===S.me.id;
   $('startBtn').classList.toggle('hidden', !host);
   $('waitMsg').textContent = host ? '준비되면 시작 버튼을 눌러주세요' : '방장이 시작하길 기다리는 중...';
+}
+let rankSel=null;
+function selectRank(id){ rankSel=id; if(S.phase==='ended') renderEnd(); else renderRankTab(); }
+function rankRows(){
+  const medal=['🥇','🥈','🥉'];
+  return S.board.map((p,i)=>{
+    const idleLine = p.idleTotal>0 ? '<div style="font-size:11px;color:var(--blue);text-align:right;">⏱️ 무활동 패널티 누적 -'+fmt(p.idleTotal)+'원</div>' : '';
+    return '<div class="pl" style="cursor:pointer;'+(p.id===rankSel?'background:#2A2115;border-radius:8px;':'')+'" onclick="selectRank(\''+p.id+'\')"><span class="'+(p.id===S.me.id?'me':'')+'"><span class="rank">'+(medal[i]||(i+1))+'</span>'+esc(p.name)+(p.online?'':' <span class="mut">(끊김)</span>')+'</span><div style="text-align:right;"><b>'+fmt(p.total)+'원</b>'+idleLine+'</div></div>';
+  }).join('');
+}
+function detailHtml(p){
+  const st=p.stats||{};
+  const games=[['📈 주식',st.stock],['💰 코인',st.coin],['✌️ 가위바위보',st.rps],['🥤 야바위',st.shell],['🎲 친치로',st.chin],['🐎 경마',st.horse],['🎰 슬롯머신',st.slot],['🎫 복권',st.lotto],['🎡 룰렛',st.roulette],['🃏 카드깡',st.gacha],['⛏️ 아오지 탄광',st.aoji]].map(r=>[r[0],r[1]||0]);
+  const idle=-(p.idleTotal||0), net=games.reduce((a,r)=>a+r[1],0)+idle;
+  const cls=v=>v>0?'pl-plus':(v<0?'pl-minus':'muted'), sg=v=>(v>=0?'+':'')+fmt(v)+'원';
+  const best=games.reduce((a,r)=>r[1]>a[1]?r:a,['',0]), worst=games.reduce((a,r)=>r[1]<a[1]?r:a,['',0]);
+  let html='<div class="portfolio-title">📊 '+esc(p.name)+'님의 게임별 손익</div>';
+  html+=games.concat([['⏱️ 무활동 패널티',idle]]).map(r=>'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #241E17;font-size:13px;"><span>'+r[0]+'</span><span class="'+cls(r[1])+'">'+sg(r[1])+'</span></div>').join('');
+  html+='<div style="display:flex;justify-content:space-between;padding-top:10px;font-size:14px;"><b>현재 손익 (시작 100,000원 대비)</b><b class="'+cls(net)+'">'+sg(net)+'</b></div>';
+  if(best[1]>0) html+='<div class="msg win" style="margin:10px 0 0;font-size:13px;">🔥 가장 많이 번 게임: '+best[0]+' '+sg(best[1])+'</div>';
+  if(worst[1]<0) html+='<div class="msg lose" style="margin:4px 0 0;font-size:13px;">💸 가장 많이 잃은 게임: '+worst[0]+' '+sg(worst[1])+'</div>';
+  return html;
+}
+function fixRankSel(){ if(!rankSel || !S.board.some(p=>p.id===rankSel)) rankSel=S.me.id; }
+function renderRankTab(){
+  fixRankSel();
+  $('boardBox').innerHTML = rankRows()+'<div style="margin-top:14px;border-top:1px solid #382E22;padding-top:12px;">'+detailHtml(S.board.find(x=>x.id===rankSel))+'</div>';
+}
+function renderEnd(){
+  fixRankSel();
+  $('final').innerHTML = rankRows();
+  $('finalDetail').innerHTML = detailHtml(S.board.find(x=>x.id===rankSel));
 }
 function clock(t){ return Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); }
 function boardHtml(){
@@ -688,8 +756,9 @@ function renderTabExtras(){
   if(activeTab==='home') renderGameStats();
   if(activeTab==='stock') renderPortfolio('stock');
   if(activeTab==='coin') renderPortfolio('coin');
-  if(activeTab==='rank') $('boardBox').innerHTML = boardHtml();
+  if(activeTab==='rank') renderRankTab();
   if(activeTab==='aoji') renderAojiMeter(S.me.aoji);
+  if(activeTab==='gacha') renderCollection();
 }
 function build(){
   built = true;
@@ -752,7 +821,7 @@ function renderPortfolio(type){
 }
 function renderGameStats(){
   const st = S.me.stats;
-  const rows = [['📈 주식',st.stock],['💰 코인',st.coin],['✌️ 가위바위보',st.rps],['🥤 야바위',st.shell],['🎲 친치로',st.chin],['🐎 경마',st.horse],['🎰 슬롯머신',st.slot],['🎫 복권',st.lotto],['🎡 룰렛',st.roulette],['⛏️ 아오지 탄광',st.aoji]];
+  const rows = [['📈 주식',st.stock],['💰 코인',st.coin],['✌️ 가위바위보',st.rps],['🥤 야바위',st.shell],['🎲 친치로',st.chin],['🐎 경마',st.horse],['🎰 슬롯머신',st.slot],['🎫 복권',st.lotto],['🎡 룰렛',st.roulette],['🃏 카드깡',st.gacha],['⛏️ 아오지 탄광',st.aoji]];
   const tot = rows.reduce((s,r)=>s+r[1],0);
   const cls = v => v>0?'pl-plus':(v<0?'pl-minus':'muted');
   $('gameStatsBox').innerHTML = '<div class="portfolio-title">📊 내 게임별 손익 현황</div>'+
@@ -803,9 +872,11 @@ function collectRPS(){ gapi({game:'rps',op:'collect'}).then(()=>applyRps(0,0)).c
 /* ========================= 야바위 ========================= */
 let shellPos=[0,1,2], shellBusy=false;
 function updateCupPositions(){ for(let c=0;c<3;c++) $('cup'+c).style.transform='translateX('+(shellPos.indexOf(c)*130)+'px)'; }
+let shellTimer=null, shellBetAmt=0;
 async function startShell(){
   if(shellBusy) return;
   const bet = parseInt($('shellBet').value)||0;
+  shellBetAmt=bet; clearInterval(shellTimer);
   shellBusy=true; [0,1,2].forEach(i=> $('shellChoice'+i).disabled=true);
   let r; try{ r = await gapi({game:'shell',op:'start',bet}); }catch(e){ toast(e.message); shellBusy=false; return; }
   shellPos=[0,1,2];
@@ -819,16 +890,30 @@ async function startShell(){
   await sleep(350);
   [0,1,2].forEach(id=> $('cup'+id).style.transition='transform .14s linear');
   for(const [i,j] of r.swaps){ const t=shellPos[i]; shellPos[i]=shellPos[j]; shellPos[j]=t; updateCupPositions(); await sleep(140); }
-  shellBusy=false; $('shellMsg').textContent='컵을 선택하세요!';
+  shellBusy=false;
   [0,1,2].forEach(i=> $('shellChoice'+i).disabled=false);
+  const end=Date.now()+5000;
+  const show=()=>{ $('shellMsg').textContent='컵을 선택하세요! 남은 시간 '+Math.max(1,Math.ceil((end-Date.now())/1000))+'초 (지나면 배팅금을 잃어요)'; };
+  show();
+  shellTimer=setInterval(async()=>{
+    if(Date.now()<end){ show(); return; }
+    clearInterval(shellTimer);
+    [0,1,2].forEach(i=> $('shellChoice'+i).disabled=true);
+    try{ const r=await gapi({game:'shell',op:'timeout'}); revealShell(r); $('shellMsg').textContent='⏰ 시간 초과! 배팅금 '+fmt(shellBetAmt)+'원을 잃었습니다.'; }catch(e){ toast(e.message); }
+  },200);
+}
+function revealShell(r){
+  const marker=$('ballMarker'); marker.style.transform='translateX('+(r.ballSlot*130)+'px)'; marker.style.opacity=1;
+  const el=$('cup'+r.ballCup); el.style.transition='transform .35s ease'; el.style.transform='translateX('+(r.ballSlot*130)+'px) translateY(-70px)';
 }
 async function chooseShell(slot){
   if(shellBusy) return;
+  clearInterval(shellTimer);
   [0,1,2].forEach(i=> $('shellChoice'+i).disabled=true);
   try{
     const r = await gapi({game:'shell',op:'pick',slot});
-    const marker=$('ballMarker'); marker.style.transform='translateX('+(r.ballSlot*130)+'px)'; marker.style.opacity=1;
-    const el=$('cup'+r.ballCup); el.style.transition='transform .35s ease'; el.style.transform='translateX('+(r.ballSlot*130)+'px) translateY(-70px)';
+    revealShell(r);
+    if(r.timeout){ $('shellMsg').textContent='⏰ 시간 초과! 배팅금 '+fmt(shellBetAmt)+'원을 잃었습니다.'; return; }
     $('shellMsg').textContent = r.win ? '정답입니다! '+fmt(r.payout)+'원 획득!' : '꽝! 공은 '+(r.ballSlot+1)+'번 컵에 있었습니다.';
   }catch(e){ toast(e.message); }
 }
@@ -1004,6 +1089,45 @@ async function spinRoulette(){
   const col=RCOL[idx], m=$('rouletteMsg'), head='결과: '+r.n+' ('+RKO[col]+', '+(r.n%2?'홀':'짝')+') — ';
   if(r.win>0){ m.className='msg win'; m.textContent=head+fmt(r.win)+'원 획득!'; } else { m.className='msg lose'; m.textContent=head+fmt(bet)+'원을 잃었습니다.'; }
   rBusy=false; release();
+}
+
+/* ========================= 카드깡 ========================= */
+const GTIERS={
+  N:{label:'일반',value:1500,rc:'#9a9a9a',rc2:'#2c2c2c',cards:[['🐌','느릿달팽이','Lv.1 · 초록 들판'],['🍄','초록버섯돌이','Lv.2 · 숲 입구'],['🐛','꿈틀애벌레','Lv.3 · 풀숲'],['💧','말랑슬라임','Lv.2 · 물가']]},
+  R:{label:'레어',value:4000,rc:'#4aa3ff',rc2:'#12304f',cards:[['🐗','멧돼지 무쇠','Lv.20 · 깊은 숲'],['🦇','동굴박쥐 어둠이','Lv.25 · 박쥐 동굴'],['🐻','산골곰 도토리','Lv.30 · 단풍 산']]},
+  SR:{label:'슈퍼레어',value:12000,rc:'#b46bff',rc2:'#33174f',cards:[['🐺','은빛늑대 서리','Lv.50 · 설원'],['🦂','모래전갈 샌디크','Lv.55 · 모래 협곡'],['🦅','폭풍매 스톰','Lv.60 · 폭풍 절벽']]},
+  SSR:{label:'SSR',value:31000,rc:'#ffb020',rc2:'#4a3208',cards:[['🐉','화염룡 이그니스','보스 · Lv.100 · 용암 동굴'],['🦑','심해촉수왕 아비스','보스 · Lv.110 · 심해 신전'],['🗿','고대골렘왕 가이아','보스 · Lv.120 · 잊힌 유적']]},
+  UR:{label:'울트라레어',value:120000,rc:'#ff4d6d',rc2:'#4f1020',cards:[['🔮','초월의 지배자 제로','전설 보스 · Lv.200 · 차원의 틈'],['🌌','우주수호룡 코스모스','전설 보스 · Lv.250 · 별의 심장']]}
+};
+function cardHtml(tier,idx,cls){
+  const t=GTIERS[tier], c=t.cards[idx];
+  return '<div class="pcard '+(cls||'')+'" style="--rc:'+t.rc+';--rc2:'+t.rc2+'"><div class="pt">'+t.label+'</div><div class="pe">'+c[0]+'</div><div class="pn">'+c[1]+'</div><div class="ps">'+c[2]+'</div><div class="pv">가치 '+fmt(t.value)+'원</div></div>';
+}
+function renderCollection(){
+  const have=(S&&S.me.cards)||{};
+  let owned=0,total=0;
+  const html=Object.keys(GTIERS).map(k=>{
+    const t=GTIERS[k];
+    return '<div class="coll-tier"><div class="ct" style="color:'+t.rc+'">'+t.label+'</div><div class="coll-row">'+
+      t.cards.map((c,i)=>{ const n=have[k+i]||0; total++; if(n) owned++;
+        return '<div class="coll-card '+(n?'':'none')+'"><div class="ce">'+(n?c[0]:'❓')+'</div>'+(n?c[1]+'<br>×'+n:'???')+'</div>'; }).join('')+'</div></div>';
+  }).join('');
+  $('collection').innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">수집 '+owned+' / '+total+'종</div>'+html;
+}
+let gachaBusy=false;
+async function buyPack(){
+  if(gachaBusy) return;
+  gachaBusy=true; hold=true;
+  let r; try{ r=await gapi({game:'gacha'}); }catch(e){ toast(e.message); gachaBusy=false; release(); return; }
+  const stage=$('gachaStage'), m=$('gachaMsg');
+  m.className='msg'; m.textContent='카드를 뽑는 중...';
+  stage.innerHTML='<div class="pcard back shake"><div class="pe">❓</div></div>';
+  await sleep(1100);
+  stage.innerHTML=cardHtml(r.tier,r.idx,(r.tier==='SSR'||r.tier==='UR')?'big':'pop');
+  const t=GTIERS[r.tier], c=t.cards[r.idx], diff=r.value-5000;
+  m.className='msg '+(diff>=0?'win':'lose');
+  m.textContent=t.label+' '+c[1]+'! '+fmt(r.value)+'원으로 환전 ('+(diff>=0?'+':'')+fmt(diff)+'원)';
+  gachaBusy=false; release(); renderCollection();
 }
 
 /* ========================= 아오지 탄광 ========================= */
